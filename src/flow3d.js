@@ -76,6 +76,12 @@ function init() {
   // ===== zone 2: flight over tiny fields ===============================================
   const landTex = loadTex('/img/land.webp', THREE.MirroredRepeatWrapping);
   const land = at(flat(landTex, { transparent: false, depthWrite: true }), -.2);
+  const MINI_W = .55;                                                       // tiny highway seen from cruising altitude
+  const miniTex = loadTex('/img/road.webp', THREE.MirroredRepeatWrapping); miniTex.wrapS = THREE.ClampToEdgeWrapping;
+  const miniRoad = at(flat(miniTex, { transparent: false, depthWrite: true, color: '#e9eef3' }), -.19);
+  // soft white bands that hide the seam between zones inside the clouds
+  const bandTex = ctex(4, 256, (g, w, h) => { const l = g.createLinearGradient(0, 0, 0, h); l.addColorStop(0, 'rgba(246,249,252,0)'); l.addColorStop(.3, 'rgba(246,249,252,.97)'); l.addColorStop(.7, 'rgba(246,249,252,.97)'); l.addColorStop(1, 'rgba(246,249,252,0)'); g.fillStyle = l; g.fillRect(0, 0, w, h); });
+  const bands = [0, 1].map(() => at(flat(bandTex), 1.9));
   const plane = photo('/img/plane.webp', 4.6, 4.6 * 874 / 844, [0, 0, 0]);
   const planeShadow = flat(plane.userData.body.material.map, { color: 0x0a1424, opacity: .25 }); planeShadow.scale.set(1.9, 1.9 * 874 / 844, 1); at(planeShadow, .02);
   const lowClouds = Array.from({ length: 22 }, (_, i) => { const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: puffs[i % 3], transparent: true, opacity: 0, depthWrite: false })); s.scale.setScalar(5 + rand() * 6); at(s, .05); return { s, x: rand(), k: rand() }; });
@@ -118,7 +124,10 @@ function init() {
   });
   const boxTex = PAL.map(containerTex);
   const CW = .42, CL = .95;
-  const container = (i) => { const m = flat(boxTex[i % boxTex.length]); m.scale.set(CW, CL, 1); return m; };
+  const realBox = [0, 1, 2, 3].map((i) => loadTex(`/img/c${i}.webp`, THREE.ClampToEdgeWrapping));
+  const realBlk = [[1, 88, 66], [2, 60, 66], [3, 88, 75], [4, 88, 72], [5, 60, 72]].map(([n, w, h]) => ({ t: loadTex(`/img/blk${n}.webp`, THREE.ClampToEdgeWrapping), w: w / U, h: h / U }));
+  const container = (i) => { const m = flat(realBox[i % realBox.length]); m.scale.set(14 / U * 1.15, 66 / U * 1.15, 1); return m; };
+  const block = (i) => { const b = realBlk[i % realBlk.length]; const g = new THREE.Group(); const sh = flat(b.t, { color: 0x0a1424, opacity: .35 }); sh.scale.set(b.w, b.h, 1); sh.position.set(.06, -.05, -.005); const m = flat(b.t); m.scale.set(b.w, b.h, 1); g.add(sh, m); g.userData.w = b.w; return g; };
   const port = new THREE.Group(); scene.add(port);
   const quay = flat(concrete, { transparent: false }); port.add(quay);
   const yard = new THREE.Group(); port.add(yard);
@@ -137,16 +146,16 @@ function init() {
     const boom = flat(boomTex); boom.scale.set(3.4, .3, 1); boom.position.set(-.1, 0, .05); cr.add(boom);
     const house = new THREE.Mesh(new THREE.PlaneGeometry(.7, .55), new THREE.MeshBasicMaterial({ color: '#f2f5f8', depthWrite: false })); house.position.set(-1.55, 0, .06); cr.add(house);
     const trolley = new THREE.Mesh(new THREE.PlaneGeometry(.42, .46), new THREE.MeshBasicMaterial({ color: '#f4f6f8', depthWrite: false })); trolley.position.z = .08; cr.add(trolley);
-    const load = container(i); load.rotation.z = Math.PI / 2; load.position.z = .07; load.visible = false; cr.add(load);
+    const load = container(i); load.position.z = .07; load.visible = false; cr.add(load);
     port.add(cr); cranes.push({ cr, trolley, load, phase: i * .31, placed: 0, armed: true });
   }
 
   // ===== transition clouds ===============================================================
   const junction = [[], []];
-  junction.forEach((arr) => { for (let i = 0; i < 110; i++) {
+  junction.forEach((arr) => { for (let i = 0; i < 140; i++) {
     const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: puffs[i % 4], transparent: true, opacity: .95, depthWrite: false }));
-    const near = i < 80; s.scale.setScalar(near ? 5 + rand() * 5 : 7 + rand() * 6); at(s, 2 + rand());
-    arr.push({ s, near, u: rand() * 2 - 1, dy: (rand() * 2 - 1) * (near ? 3.8 : 2.6), op: near ? .97 : .55 });
+    const near = i < 105; s.scale.setScalar(near ? 5 + rand() * 5 : 7 + rand() * 6); at(s, 2 + rand());
+    arr.push({ s, near, u: rand() * 2 - 1, dy: (rand() + rand() - 1) * (near ? 3.2 : 2.4), op: near ? .97 : .55 });
   } });
 
   // ===== dark band + neural river (right margin) =========================================
@@ -199,13 +208,13 @@ function init() {
   const main = makeRiver({ z: .6, parallax: 1, density: 2.6, dotPx: 9, dotOp: 1, lineOp: .2, pulsesN: 150, flashN: 50, speed: 1.3, flashChance: .35 });
 
   // data links: main river → the cargo (trailer, plane, ship's container rows)
-  const LINKS = 4;
+  const LINKS = 2;
   const linkGeo = new THREE.BufferGeometry(); linkGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(LINKS * 2 * 3 * 16), 3));
   const linkMat = new THREE.LineBasicMaterial({ color: '#0078d0', transparent: true, opacity: .6, depthWrite: false });
   const linkLines = new THREE.LineSegments(linkGeo, linkMat); linkLines.frustumCulled = false; at(linkLines, .7);
   const DATA = 40, dataGeo = flashGeoOf(DATA), dataMat = glowMat('#1a8fff'); dataMat.blending = THREE.NormalBlending;
   const dataPts = new THREE.Points(dataGeo, dataMat); dataPts.frustumCulled = false; at(dataPts, .72);
-  const data = Array.from({ length: DATA }, (_, i) => ({ link: i % LINKS, t: rand(), v: .25 + rand() * .2 }));
+  const data = Array.from({ length: DATA }, (_, i) => ({ link: i % LINKS, dir: (i >> 1) % 2 ? -1 : 1, t: rand(), v: .22 + rand() * .2 }));
 
   const cargo = new THREE.Group(); cargo.add(truck, plane, ship); at(cargo, .3);
 
@@ -226,13 +235,16 @@ function init() {
     J1 = worldY(q('#ai', docH * .3)); J2 = worldY(q('#contact', docH * .75));
     camEnd = -(docH - h) / U;
     const top = visH, gW = halfW * 2 + 4;
-    const gBot = J1 - 7;
+    const gBot = J1;
     road.scale.set(TILE_W * .5, top - gBot, 1); road.position.set(laneX, (top + gBot) / 2, .01);
     roadTex.repeat.set(.5, (top - gBot) / TILE_H); roadTex.offset.x = .25;
     steppe.scale.set(gW, top - gBot, 1); steppe.position.set(0, (top + gBot) / 2, 0);
     steppeTex.repeat.set(gW / (TILE_W * .76), (top - gBot) / TILE_H);
-    land.scale.set(gW, visH + 2, 1);
-    landTex.repeat.set(gW / 24, (visH + 2) / 24);
+    land.scale.set(gW, J1 - J2, 1); land.position.set(0, (J1 + J2) / 2, -.2);
+    landTex.repeat.set(gW / 24, (J1 - J2) / 24);
+    miniRoad.scale.set(MINI_W * 1.12, J1 - J2, 1); miniRoad.position.set(laneX, (J1 + J2) / 2, -.19);
+    miniTex.repeat.set(ROAD_FR * 1.12, (J1 - J2) / (MINI_W / ROAD_FR * 1376 / 768)); miniTex.offset.x = .503 - ROAD_FR * .56;
+    bands.forEach((bd, k) => { bd.scale.set(gW, 4.2, 1); bd.position.set(0, k ? J2 : J1, 1.9); });
     const oTop = J2 + 4, oBot = camEnd - visH;
     ocean.scale.set(gW, oTop - oBot, 1); ocean.position.set(0, (oTop + oBot) / 2, -.03);
     oceanTex.repeat.set(gW / OCEAN_TILE, (oTop - oBot) / OCEAN_TILE);
@@ -242,11 +254,11 @@ function init() {
     concrete.repeat.set(quayW / 4.3, 13 / 8.6);
     yard.clear();
     const yr = mulberry32(5);
-    for (let c = 0; c < 8; c++) for (let r = 0; r < 9; r++) {
-      if (yr() < .18) continue;
-      const box = container(c * 9 + r); box.position.set(quayEdge - 2.3 - c * .56, -5 + r * 1.12, .1); yard.add(box);
+    for (let c = 0; c < 4; c++) for (let r = 0; r < 8; r++) {
+      if (yr() < .15) continue;
+      const b = block(c * 8 + r); b.position.set(quayEdge - 2.05 - c * 1.6, -5.2 + r * 1.35, .1); yard.add(b);
     }
-    cranes.forEach((c, i) => { c.cr.position.set(quayEdge + .25, -1.9 + i * 1.9, .12); c.quayX = -1.25; c.shipX = SHIP_W / 2 + .18; c.placed = 0; });
+    cranes.forEach((c, i) => { c.cr.position.set(quayEdge + .25, -1.9 + i * 1.9, .12); c.quayX = -.75; c.shipX = SHIP_W / 2 + .18; c.placed = 0; });
     port.userData = { berthY, quayEdge };
     const spread = narrow ? halfW * .25 : Math.min(1.6, margin * .32);
     [[main, 0], [farA, -.28], [farB, .3]].forEach(([r, dx]) => {
@@ -276,7 +288,7 @@ function init() {
 
     // docking: once the last screen is reached the ship sails on by itself and berths
     const atEnd = camY < camEnd + visH * .35;
-    dockT = Math.min(1, Math.max(0, dockT + (atEnd ? dt / 7 : -dt / 2.5)));
+    dockT = Math.min(1, Math.max(0, dockT + (atEnd ? dt / 4.5 : -dt / 2.5)));
     const ease = 1 - Math.pow(1 - dockT, 3);
     const berthY = port.userData.berthY;
     const sy = ship.visible ? vy + (berthY - vy) * ease : vy;
@@ -284,13 +296,19 @@ function init() {
 
     // highway
     roadTex.offset.y = -(time * DRIVE) / TILE_H; steppeTex.offset.y = roadTex.offset.y;
-    traffic.forEach((t) => { const span = 26, y = vy - 13 + ((t.k * span + time * (DRIVE + 1.1)) % span); t.o.position.set(laneX + LANE, y, .3); t.o.visible = y > J1 + 2.5 && y < visH; });
-    { const y = vy - 5.2 - ((time * .25) % 3); convoy.position.set(laneX - LANE, y, .3); convoy.visible = y > J1 + 2.5; }
+    traffic.forEach((t) => {
+      if (t.y === undefined || t.y > camY + visH * .8 || t.y < camY - visH * 1.6) t.y = camY - visH * (.75 + t.k * .9);
+      t.y += dt * (DRIVE + .9);                                                     // oncoming: steady speed up the right lane
+      t.o.position.set(laneX + LANE, t.y, .3); t.o.visible = t.y > J1 + 2.5;
+    });
+    if (convoy.userData.y === undefined || convoy.userData.y > camY + visH * .8 || convoy.userData.y < camY - visH * 1.6) convoy.userData.y = camY - visH * .45;
+    convoy.userData.y += dt * (DRIVE - 2.1);                                       // a slower truck ahead in our lane
+    convoy.position.set(laneX - LANE, convoy.userData.y, .3); convoy.visible = convoy.userData.y > J1 + 2.5 && convoy.userData.y < vy - 3.8;
 
     // flight: miniature fields slide slower than the page (parallax), plane shadow far below
-    land.visible = camY < J1 + visH && camY > J2 - visH;
-    land.position.set(0, camY, -.2);
-    landTex.offset.y = (camY * .35 - time * .05) / 24;
+    land.visible = miniRoad.visible = camY < J1 + visH && camY > J2 - visH;
+    landTex.offset.y = (-camY * .65 + time * .25) / 24;                       // fields lag behind the page: far below
+    miniTex.offset.y = (-camY * .65 + time * .25) / (MINI_W / ROAD_FR * 1376 / 768);
     planeShadow.visible = plane.visible; planeShadow.position.set(laneX + 2.2, vy - 1.8, .02);
     lowClouds.forEach((c) => {
       const y = camY + visH * .6 - ((c.k * visH * 1.4 + time * .9) % (visH * 1.4));
@@ -298,7 +316,7 @@ function init() {
     });
 
     // sea
-    oceanTex.offset.y = -time * .05 * (1 - ease); oceanTex.offset.x = Math.sin(time * .08) * .015;
+    oceanTex.offset.y += -dt * .03 * (1 - Math.min(1, ease * 4)); oceanTex.offset.x = Math.sin(time * .08) * .015;
     if (ship.visible && ease < .97) {
       wakeNext -= dt;
       while (wakeNext < 0) {
@@ -306,7 +324,7 @@ function init() {
         const p = wakeP.find((q) => q.life <= 0); if (!p) break;
         const side = rand() < .5 ? -1 : 1, bow = rand() < .3;
         p.x = laneX + side * (SHIP_W * .45 + rand() * .08); p.y = sy + (bow ? -SHIP_L * .44 : SHIP_L * (.3 + rand() * .2));
-        p.vx = side * (bow ? .45 : .28) * (.6 + rand() * .6) * (1 - ease); p.vy = (1.6 + rand() * .6) * (1 - ease) + .1;
+        p.vx = side * (bow ? .45 : .28) * (.6 + rand() * .6) * (1 - ease); p.vy = (1.1 + rand() * .4) * (1 - ease) + .05;
         p.life = p.max = 3 + rand() * 2.5; p.s = (bow ? .22 : .3) + rand() * .2;
       }
     }
@@ -328,13 +346,13 @@ function init() {
       else if (t < .55) { x = c.shipX + (c.quayX - c.shipX) * sm(.3, .55, t); carry = true; }
       else if (t < .7) { x = c.quayX; carry = t < .64; }
       else { x = c.quayX + (c.shipX - c.quayX) * sm(.7, 1, t); carry = false; }
-      if (!moored) { x = -1.25; carry = false; }
+      if (!moored) { x = -.75; carry = false; }
       c.trolley.position.set(x, 0, .08); c.load.visible = carry; c.load.position.set(x, 0, .07);
       if (moored && t > .64 && c.armed) {
         c.armed = false;
         if (c.placed < 6) {
           const nb = container(c.placed + ci * 3);
-          nb.position.set(port.userData.quayEdge - 1.0 - (c.placed % 3) * .5, c.cr.position.y + (c.placed > 2 ? .55 : -.55), .1);
+          nb.position.set(port.userData.quayEdge - .45 - (c.placed % 3) * .26, c.cr.position.y + (c.placed > 2 ? .62 : -.62), .13);
           yard.add(nb); c.placed++;
         }
       }
@@ -379,12 +397,12 @@ function init() {
     {
       const targets = [];
       const cx = cargo.position.x, cy = cargo.position.y, cs = cargo.scale.x;
-      if (truck.visible) targets.push([cx, cy + .5 * cs], [cx, cy + 1.2 * cs], [cx, cy - .2 * cs], [cx, cy + .9 * cs]);
-      else if (plane.visible) targets.push([cx, cy + .3 * cs], [cx - 1.2 * cs, cy + .1 * cs], [cx + 1.2 * cs, cy + .1 * cs], [cx, cy - .9 * cs]);
-      else targets.push(...[-1.6, -.5, .6, 1.6].map((dy) => [cx, cy + dy * cs]));
+      if (truck.visible) targets.push([cx, cy + .9 * cs], [cx, cy + .1 * cs]);
+      else if (plane.visible) targets.push([cx, cy + .5 * cs], [cx, cy - .4 * cs]);
+      else targets.push([cx, cy + 1.2 * cs], [cx, cy - 1.0 * cs]);
       const lp = linkGeo.attributes.position.array; let k = 0;
       const curves = targets.map(([tx, ty], li) => {
-        const n = main.nodes[nearestIn(main.nodes, ty + (li - 1.5) * .7)] || new THREE.Vector3();
+        const n = main.nodes[nearestIn(main.nodes, ty + (li - .5) * 1.2)] || new THREE.Vector3();
         const sx = main.group.position.x + n.x, sy2 = n.y;
         const c = new THREE.QuadraticBezierCurve3(new THREE.Vector3(sx, sy2, 0), new THREE.Vector3((sx + tx) / 2, Math.max(sy2, ty) + 1.4 + li * .25, 0), new THREE.Vector3(tx, ty, 0));
         const pts = c.getPoints(16);
@@ -396,7 +414,7 @@ function init() {
       const dp = dataGeo.attributes.position.array, ds = dataGeo.attributes.size.array, da = dataGeo.attributes.alpha.array;
       data.forEach((d, i) => {
         d.t = (d.t + dt * d.v) % 1;
-        curves[d.link].getPoint(d.t, tmp).toArray(dp, i * 3);
+        curves[d.link].getPoint(d.dir > 0 ? d.t : 1 - d.t, tmp).toArray(dp, i * 3);
         ds[i] = 12 + 8 * Math.sin(d.t * Math.PI); da[i] = Math.min(1, Math.sin(d.t * Math.PI) * 1.4);
       });
       dataGeo.attributes.position.needsUpdate = true; dataGeo.attributes.size.needsUpdate = true; dataGeo.attributes.alpha.needsUpdate = true;
