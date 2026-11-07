@@ -3,220 +3,171 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PRIME FLOW — industrial equipment and materials supply in Uzbekistan</title>
-<meta name="description" content="PRIME FLOW LLC supplies electrical equipment, railway signalling, instrumentation, machinery, spare parts and MRO to energy, oil &amp; gas and railway companies in Uzbekistan — through tenders and direct contracts.">
-<meta name="theme-color" content="#05060f">
+<title>PRIME FLOW — industrial supply and AI agents for procurement</title>
+<meta name="description" content="PRIME FLOW LLC supplies equipment, spare parts and materials to energy, oil &amp; gas and railway companies in Uzbekistan, and builds AI agents for the procurement teams of large organisations.">
+<meta name="theme-color" content="#eef3f8">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="modulepreload" href="/vendor/three.module.min.js">
 <link rel="alternate" hreflang="ru" href="https://primeflow.uz/">
 <link rel="alternate" hreflang="en" href="https://primeflow.uz/en/">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&family=Space+Grotesk:wght@400;500&family=Montserrat:wght@600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500&family=Montserrat:wght@600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --canvas:#05060f; --steel:#2f343e; --ice:#d8ecf8; --frost:#d1e4fa; --moon:#c7d3ea; --fog:#9da7ba;
-  --violet:#0078d0; --blueprint:#5cc8f7;
-  --edge:rgba(186,215,247,.12); --edge-strong:rgba(186,215,247,.24);
-  --glass:rgba(186,214,247,.03); --glass-2:rgba(186,214,247,.06);
+  --canvas:#eef3f8; --ink:#0b2545; --text:#22374f; --muted:#4d6279; --soft:#6b7f95;
+  --blue:#0078d0; --blue-2:#0a88e6; --sky:#5cc8f7;
+  --line:rgba(11,37,69,.12); --line-2:rgba(11,37,69,.2);
+  --card:rgba(255,255,255,.82); --card-2:rgba(255,255,255,.94);
   --display:'Space Grotesk',system-ui,sans-serif; --mark:'Montserrat','Space Grotesk',sans-serif; --body:'Inter',system-ui,sans-serif; --mono:'JetBrains Mono',ui-monospace,monospace;
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
-body{margin:0;background:var(--canvas);color:var(--frost);font:400 16px/1.5 var(--body);letter-spacing:-.01em;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body{margin:0;background:var(--canvas);color:var(--text);font:400 16px/1.55 var(--body);letter-spacing:-.005em;-webkit-font-smoothing:antialiased;overflow-x:hidden}
 a{color:inherit;text-decoration:none}
-:focus-visible{outline:2px solid var(--blueprint);outline-offset:3px;border-radius:6px}
-.wrap{max-width:1200px;margin:0 auto;padding:0 24px}
+:focus-visible{outline:2px solid var(--blue);outline-offset:3px;border-radius:6px}
+.wrap{max-width:1000px;margin:0 auto;padding:0 24px}
 
-/* blueprint grid */
-.grid-bg{position:fixed;inset:0;z-index:-1;pointer-events:none;
-  background-image:linear-gradient(rgba(186,215,247,.055) 1px,transparent 1px),linear-gradient(90deg,rgba(186,215,247,.055) 1px,transparent 1px);
-  background-size:88px 88px;mask-image:radial-gradient(ellipse 80% 70% at 50% 20%,#000 30%,transparent 85%)}
-
-/* header */
-header{position:sticky;top:0;z-index:20;background:rgba(5,6,15,.72);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--edge)}
-.bar{display:flex;align-items:center;justify-content:space-between;gap:16px;height:64px}
-.brand{display:flex;align-items:center;gap:10px;font:600 15px var(--mark);letter-spacing:.06em;color:#fff}
-.brand svg{flex:none}
-nav.main{display:flex;gap:4px;align-items:center}
-nav.main a{padding:8px 12px;font-size:14px;color:var(--moon);border-radius:999px}
-nav.main a:hover{color:var(--ice);background:var(--glass-2)}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;font:500 14px var(--body);padding:8px 16px;border:0;cursor:pointer;white-space:nowrap}
-.btn-ghost{background:rgba(186,214,247,.06);box-shadow:inset 0 0 0 1px var(--edge);color:#fff}
-.btn-ghost:hover{background:rgba(186,214,247,.12)}
-.btn-violet{background:var(--violet);color:#fff;padding:12px 24px;font-size:15px;box-shadow:0 0 0 1px rgba(255,255,255,.1) inset,0 8px 32px rgba(0,120,208,.45)}
-.btn-violet:hover{background:#0a88e6}
-.btn-lg{padding:12px 24px;font-size:15px}
-.lang{font:400 13px var(--mono);color:var(--fog);padding:8px 10px}
-.lang:hover{color:var(--ice)}
-
-/* hero */
-.hero{position:relative;text-align:center;padding:112px 0 0;overflow:hidden;min-height:clamp(720px,100vh,980px)}
-.hero .wrap{position:relative;z-index:2}
-#flow{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:0;transition:opacity 1.4s ease}
+#flow{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:0;transition:opacity 1.2s ease}
 #flow.ready{opacity:1}
-.veil{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0;
-  background:linear-gradient(90deg,rgba(5,6,15,.05) 14%,rgba(5,6,15,.74) 32%,rgba(5,6,15,.8) 50%,rgba(5,6,15,.74) 68%,rgba(5,6,15,.05) 86%)}
-@media (max-width:700px){.veil{background:rgba(5,6,15,.62)}}
+.veil{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:linear-gradient(90deg,rgba(238,243,248,0) calc(50% - 560px),rgba(238,243,248,.9) calc(50% - 470px),rgba(238,243,248,.93) 50%,rgba(238,243,248,.9) calc(50% + 470px),rgba(238,243,248,0) calc(50% + 560px))}
+@media (max-width:1180px){.veil{background:linear-gradient(90deg,rgba(238,243,248,.35),rgba(238,243,248,.9) 18%,rgba(238,243,248,.93) 50%,rgba(238,243,248,.9) 82%,rgba(238,243,248,.35))}}
 main,footer{position:relative;z-index:1}
-.card,.princ div,.frame,.form{backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
-.card,.princ div{background:rgba(9,12,26,.62)}
-.hero .lead{text-shadow:0 2px 18px rgba(5,6,15,.95);background:radial-gradient(closest-side,rgba(5,6,15,.8),rgba(5,6,15,.45) 70%,transparent);padding:14px 28px}
-.halo{position:absolute;left:50%;top:-140px;width:900px;height:620px;transform:translateX(-50%);z-index:-1;
-  background:conic-gradient(from 180deg at 50% 0%,transparent 0deg,rgba(0,120,208,.45) 160deg,rgba(92,200,247,.5) 180deg,rgba(0,120,208,.45) 200deg,transparent 360deg);
-  filter:blur(60px);opacity:.55;mask-image:radial-gradient(ellipse at top,#000 20%,transparent 70%)}
-.eyebrow{display:flex;align-items:center;justify-content:center;gap:16px;font:400 14px var(--mono);letter-spacing:.06em;color:var(--moon);margin:0 0 24px}
-.eyebrow::before,.eyebrow::after{content:"";height:1px;width:56px;background:linear-gradient(90deg,transparent,rgba(186,215,247,.3))}
+
+header{position:sticky;top:0;z-index:20;background:rgba(238,243,248,.78);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:16px;height:64px}
+.brand{display:flex;align-items:center;gap:10px;font:600 15px var(--mark);letter-spacing:.06em;color:var(--ink)}
+nav.main{display:flex;gap:2px;align-items:center}
+nav.main a{padding:8px 12px;font-size:14px;color:var(--muted);border-radius:999px}
+nav.main a:hover{color:var(--ink);background:rgba(11,37,69,.06)}
+.lang{font:400 13px var(--mono);color:var(--soft)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;font:500 14px var(--body);padding:9px 18px;border:0;cursor:pointer;white-space:nowrap}
+.btn-ghost{background:rgba(255,255,255,.7);box-shadow:inset 0 0 0 1px var(--line-2);color:var(--ink)}
+.btn-ghost:hover{background:#fff}
+.btn-blue{background:var(--blue);color:#fff;padding:13px 26px;font-size:15px;box-shadow:0 10px 28px rgba(0,120,208,.32)}
+.btn-blue:hover{background:var(--blue-2)}
+.btn-lg{padding:13px 26px;font-size:15px}
+
+.hero{position:relative;text-align:center;padding:120px 0 40px;min-height:clamp(680px,92vh,900px)}
+.eyebrow{display:flex;align-items:center;justify-content:center;gap:14px;font:400 14px var(--mono);letter-spacing:.04em;color:var(--muted);margin:0 0 22px}
+.eyebrow::before,.eyebrow::after{content:"";height:1px;width:48px;background:linear-gradient(90deg,transparent,var(--line-2))}
 .eyebrow::after{transform:scaleX(-1)}
-.wordmark{margin:0;font:600 clamp(52px,11vw,148px)/1 var(--mark);letter-spacing:.01em;
-  background:linear-gradient(180deg,#eef8ff 10%,#5cc8f7 95%);-webkit-background-clip:text;background-clip:text;color:transparent;
-  filter:drop-shadow(0 0 6px rgba(92,200,247,.35)) drop-shadow(0 0 28px rgba(0,120,208,.35))}
-.lead{max-width:640px;margin:28px auto 0;font-size:19px;line-height:1.55;color:var(--moon)}
+.wordmark{margin:0;font:600 clamp(48px,10vw,124px)/1 var(--mark);letter-spacing:.01em;
+  background:linear-gradient(180deg,#0b2545 15%,#0078d0 95%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{max-width:660px;margin:28px auto 0;font-size:19px;line-height:1.6;color:var(--text)}
 .cta-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:36px}
 
-/* fanned glass documents */
-.stage{position:relative;height:400px;margin:72px auto 0;max-width:1040px;perspective:1600px}
-.doc{position:absolute;top:0;width:320px;border-radius:16px;padding:24px;text-align:left;
-  background:linear-gradient(180deg,rgba(18,22,38,.92),rgba(7,8,18,.96));
-  box-shadow:inset 0 1px 0 rgba(216,236,248,.2),inset 0 24px 48px rgba(168,216,245,.06),0 16px 32px rgba(0,0,0,.45),0 0 0 1px var(--edge)}
-.doc.l{left:0;transform:rotate(-7deg) translateY(46px);opacity:.82}
-.doc.r{right:0;transform:rotate(7deg) translateY(46px);opacity:.82}
-.doc.c{left:50%;width:380px;transform:translateX(-50%);z-index:2}
-.doc h4{margin:0 0 4px;font:500 17px var(--display);color:var(--ice);letter-spacing:-.01em}
-.doc .sub{font:400 12px var(--mono);color:var(--fog);margin-bottom:18px}
-.row{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid rgba(186,215,247,.07);font-size:13.5px;color:var(--moon)}
-.row b{font-weight:500;color:var(--frost)}
-.badge{display:inline-block;margin-top:16px;padding:4px 8px;border-radius:6px;background:rgba(199,211,234,.12);color:var(--frost);font:500 12px var(--body)}
-.badge.ok{background:rgba(38,150,132,.18);color:#9fe3d4}
-.track{list-style:none;margin:0;padding:0}
-.track li{position:relative;padding:0 0 14px 26px;font-size:13.5px;color:var(--fog)}
-.track li::before{content:"";position:absolute;left:4px;top:5px;width:9px;height:9px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--fog)}
-.track li::after{content:"";position:absolute;left:8px;top:16px;bottom:-2px;width:1px;background:rgba(186,215,247,.14)}
-.track li:last-child::after{display:none}
-.track li.done{color:var(--frost)}
-.track li.done::before{background:var(--blueprint);box-shadow:none}
-.track li.now{color:#fff}
-.track li.now::before{background:var(--violet);box-shadow:0 0 0 4px rgba(0,120,208,.3)}
-.track small{display:block;font:400 11.5px var(--mono);color:var(--fog);margin-top:2px}
-.check{list-style:none;margin:0;padding:0}
-.check li{display:flex;gap:10px;align-items:center;padding:8px 0;border-top:1px solid rgba(186,215,247,.07);font-size:13.5px;color:var(--moon)}
-.tick{flex:none;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;background:rgba(92,200,247,.16)}
-.tick.wait{background:transparent;box-shadow:inset 0 0 0 1px var(--edge-strong)}
-
-/* sections */
 section.block{padding:120px 0 0}
-.head{text-align:center;max-width:720px;margin:0 auto 56px}
-.head h2{margin:0;font:500 clamp(32px,4.4vw,48px)/1.14 var(--display);letter-spacing:-.025em;
-  background:linear-gradient(180deg,#d8ecf8,#a9c9ef);-webkit-background-clip:text;background-clip:text;color:transparent}
-.head p{margin:18px auto 0;max-width:620px;color:var(--fog);font-size:17px}
+.head{text-align:center;max-width:760px;margin:0 auto 52px}
+.head h2,.h2{margin:0;font:500 clamp(32px,4.4vw,48px)/1.14 var(--display);letter-spacing:-.025em;color:var(--ink)}
+.head p{margin:18px auto 0;max-width:640px;color:var(--muted);font-size:17px}
+.kicker{display:inline-block;margin:0 0 14px;font:500 13px var(--mono);color:var(--blue);letter-spacing:.03em}
 
-.lines{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-.card{border-radius:16px;padding:28px 24px;background:var(--glass);
-  box-shadow:inset 0 1px 0 rgba(199,211,234,.12),inset 0 24px 48px rgba(199,211,234,.05),0 24px 32px rgba(6,6,14,.7),0 0 0 1px rgba(186,215,247,.06)}
-.card h3{margin:20px 0 8px;font:500 20px/1.25 var(--display);color:var(--ice);letter-spacing:-.01em}
-.card p{margin:0;color:var(--fog);font-size:15px}
-.ico{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;background:rgba(186,214,247,.06);box-shadow:inset 0 0 0 1px var(--edge)}
-.ico svg{width:26px;height:26px;stroke:var(--blueprint);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.card{border-radius:18px;padding:26px 24px;background:var(--card);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 0 0 1px var(--line),0 18px 40px rgba(11,37,69,.08)}
+.card h3{margin:18px 0 8px;font:500 20px/1.25 var(--display);color:var(--ink);letter-spacing:-.01em}
+.card p{margin:0;color:var(--muted);font-size:15px}
+.ico{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:rgba(0,120,208,.08);box-shadow:inset 0 0 0 1px rgba(0,120,208,.18);flex:none}
+.ico svg{width:24px;height:24px;stroke:var(--blue);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 
-/* process */
 .steps{position:relative;display:grid;grid-template-columns:repeat(6,1fr);gap:8px;list-style:none;margin:0;padding:0;counter-reset:s}
-.steps::before{content:"";position:absolute;top:32px;left:8%;right:8%;height:1px;background:linear-gradient(90deg,transparent,rgba(186,215,247,.28) 12%,rgba(186,215,247,.28) 88%,transparent)}
+.steps::before{content:"";position:absolute;top:30px;left:8%;right:8%;height:1px;background:var(--line-2)}
 .steps li{position:relative;text-align:center;counter-increment:s}
-.steps .ico{width:64px;height:64px;margin:0 auto;background:#0a0d1c}
-.steps .n{display:block;margin-top:18px;font:400 12px var(--mono);color:var(--fog)}
+.steps .ico{width:60px;height:60px;margin:0 auto;background:#fff}
+.steps .n{display:block;margin-top:16px;font:400 12px var(--mono);color:var(--soft)}
 .steps .n::before{content:counter(s,decimal-leading-zero)}
-.steps h3{margin:6px 0 6px;font:500 17px var(--display);color:var(--ice)}
-.steps p{margin:0 auto;max-width:170px;font-size:14px;color:var(--fog)}
+.steps h3{margin:6px 0;font:500 17px var(--display);color:var(--ink)}
+.steps p{margin:0 auto;max-width:170px;font-size:14px;color:var(--muted)}
 
-/* principles */
-.princ{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-radius:16px;box-shadow:0 0 0 1px var(--edge);overflow:hidden}
-.princ div{padding:36px 32px;background:var(--glass)}
-.princ div+div{box-shadow:-1px 0 0 var(--edge)}
-.princ h3{margin:0 0 10px;font:500 21px/1.25 var(--display);color:var(--ice)}
-.princ p{margin:0;color:var(--fog);font-size:15px}
-
-/* system */
-.sys{display:grid;grid-template-columns:1.05fr 1fr;gap:48px;align-items:center}
-.sys .copy h2{margin:0 0 18px;font:500 clamp(30px,3.8vw,44px)/1.14 var(--display);letter-spacing:-.025em;color:var(--ice)}
-.sys .copy p{color:var(--fog);font-size:17px;margin:0 0 16px}
-.sys ul{list-style:none;padding:0;margin:24px 0 0;display:grid;gap:12px}
-.sys li{display:flex;gap:12px;color:var(--moon);font-size:15.5px}
-.sys li::before{content:"";flex:none;width:6px;height:6px;margin-top:9px;border-radius:50%;background:var(--blueprint);box-shadow:0 0 10px var(--blueprint)}
-.frame{border-radius:16px;overflow:hidden;background:#080a16;box-shadow:inset 0 1px 0 rgba(216,236,248,.16),0 0 0 1px var(--edge),0 32px 64px rgba(0,0,0,.5)}
-.frame .top{display:flex;gap:6px;padding:12px 14px;border-bottom:1px solid var(--edge)}
-.frame .top i{width:9px;height:9px;border-radius:50%;background:var(--steel)}
-.feed{padding:20px;display:grid;gap:12px}
-.msg{border-radius:12px;padding:14px 16px;background:rgba(186,214,247,.045);box-shadow:inset 0 0 0 1px rgba(186,215,247,.08);font-size:14px;color:var(--moon)}
-.msg .who{font:400 12px var(--mono);color:var(--fog);margin-bottom:6px}
-.msg .ai{margin-top:10px;padding-top:10px;border-top:1px dashed rgba(186,215,247,.14);color:var(--frost)}
-.msg .ai span{color:var(--blueprint)}
-
-.agents{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-.agents .card{display:flex;flex-direction:column}
-.agents .top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
-.st{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:6px;font:500 12px var(--body);white-space:nowrap}
+/* AI story */
+.story{display:grid;gap:96px}
+.chapter{display:grid;grid-template-columns:300px 1fr;gap:40px;align-items:start}
+.chapter .label .num{font:500 13px var(--mono);color:var(--blue)}
+.chapter .label h3{margin:8px 0 10px;font:500 30px/1.15 var(--display);color:var(--ink);letter-spacing:-.02em}
+.chapter .label p{margin:0;color:var(--muted)}
+.pain{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.pain .card h4,.cost h4{margin:0 0 6px;font:500 18px/1.3 var(--display);color:var(--ink)}
+.pain .card p,.cost p{margin:0;color:var(--muted);font-size:15px}
+.cost{display:grid;grid-template-columns:1fr 1fr;border-radius:18px;overflow:hidden;box-shadow:0 0 0 1px var(--line);background:var(--card);backdrop-filter:blur(10px)}
+.cost div{padding:24px 26px;border-top:1px solid var(--line)}
+.cost div:nth-child(-n+2){border-top:0}
+.cost div:nth-child(2n){border-left:1px solid var(--line)}
+.cost h4{color:#b4432a}
+.agents{display:grid;gap:10px}
+details.agent{border-radius:16px;background:var(--card-2);box-shadow:0 0 0 1px var(--line),0 10px 26px rgba(11,37,69,.06);overflow:hidden}
+details.agent summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:16px;padding:16px 20px}
+details.agent summary::-webkit-details-marker{display:none}
+details.agent summary .t{flex:1;min-width:0}
+details.agent summary b{display:block;font:500 18px var(--display);color:var(--ink)}
+details.agent summary span.s{display:block;color:var(--muted);font-size:14.5px}
+details.agent summary .chev{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;box-shadow:inset 0 0 0 1px var(--line-2);transition:transform .25s}
+details.agent[open] summary .chev{transform:rotate(180deg)}
+details.agent .body{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;padding:4px 20px 20px 88px}
+details.agent .body h5{margin:0 0 4px;font:500 12px var(--mono);color:var(--blue)}
+details.agent .body p{margin:0;font-size:14.5px;color:var(--text)}
+.st{display:inline-flex;align-items:center;gap:6px;padding:4px 9px;border-radius:999px;font:500 12px var(--body);white-space:nowrap}
 .st::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
-.st.live{background:rgba(92,200,247,.12);color:#8fdcfb}
-.st.live::before{box-shadow:0 0 8px currentColor}
-.st.pilot{background:rgba(0,120,208,.18);color:#7fbdf0}
-.st.dev{background:rgba(199,211,234,.08);color:var(--fog)}
-.gain{display:grid;grid-template-columns:1fr 1.1fr;gap:48px;align-items:center;margin-top:72px}
-.gain h3{margin:0 0 20px;font:500 clamp(26px,3vw,34px)/1.2 var(--display);color:var(--ice);letter-spacing:-.02em}
-.gain dl{margin:0;display:grid;gap:20px}
-.gain dt{font:500 17px var(--display);color:var(--ice);margin-bottom:4px}
-.gain dd{margin:0;color:var(--fog);font-size:15.5px}
+.st.live{background:rgba(22,150,110,.12);color:#11795a}
+.st.pilot{background:rgba(0,120,208,.12);color:#0a63ad}
+.st.dev{background:rgba(11,37,69,.07);color:var(--soft)}
+.value{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.value .card h4{margin:14px 0 6px;font:500 18px var(--display);color:var(--ink)}
+.value .card p{margin:0;font-size:14.5px;color:var(--muted)}
+.how{list-style:none;margin:20px 0 0;padding:0;display:grid;grid-template-columns:repeat(2,1fr);gap:14px;counter-reset:h}
+.how li{counter-increment:h;padding:18px;border-radius:14px;background:var(--card);box-shadow:0 0 0 1px var(--line)}
+.how li::before{content:counter(h);display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--blue);color:#fff;font:600 13px var(--body);margin-bottom:10px}
+.how li p{margin:0;font-size:14.5px;color:var(--text)}
+.pilot{margin-top:56px;display:grid;grid-template-columns:1.1fr 1fr;gap:28px;align-items:center;border-radius:20px;padding:28px;background:linear-gradient(135deg,#0b2545,#0a4d8c);color:#e8f2fc;box-shadow:0 24px 50px rgba(11,37,69,.25)}
+.pilot h4{margin:0 0 10px;font:500 26px/1.2 var(--display);color:#fff}
+.pilot p{margin:0 0 18px;color:#c3d6ea}
+.pilot .btn-blue{background:#fff;color:var(--ink);box-shadow:none}
+.feed{display:grid;gap:10px}
+.msg{border-radius:12px;padding:14px 16px;background:rgba(255,255,255,.08);box-shadow:inset 0 0 0 1px rgba(255,255,255,.14);font-size:14px;color:#dbe8f5}
+.msg .who{font:400 12px var(--mono);color:#9fb7d1;margin-bottom:6px}
+.msg .ai{margin-top:8px;padding-top:8px;border-top:1px dashed rgba(255,255,255,.2);color:#fff}
+.msg .ai span{color:var(--sky)}
 
-/* contact */
 .contact{display:grid;grid-template-columns:1fr 440px;gap:56px;align-items:start}
-.contact h2{margin:0 0 16px;font:500 clamp(32px,4.4vw,48px)/1.12 var(--display);letter-spacing:-.025em;
-  background:linear-gradient(180deg,#eef8ff,#5cc8f7);-webkit-background-clip:text;background-clip:text;color:transparent}
-.contact .intro{color:var(--fog);font-size:17px;max-width:460px;margin:0 0 36px}
+.contact .intro{color:var(--muted);font-size:17px;max-width:460px;margin:16px 0 32px}
 dl.req{margin:0;display:grid;grid-template-columns:auto 1fr;gap:10px 24px;font-size:14.5px}
-dl.req dt{color:var(--fog)}
-dl.req dd{margin:0;color:var(--frost)}
-.form{border-radius:16px;padding:32px;background:rgba(5,6,15,.97);
-  box-shadow:inset 0 1px 0 rgba(216,236,248,.2),inset 0 24px 48px rgba(168,216,245,.06),0 16px 32px rgba(0,0,0,.3),0 0 0 1px var(--edge)}
-.form h3{margin:0 0 4px;font:500 22px var(--display);color:var(--ice)}
-.form .note{margin:0 0 22px;color:var(--fog);font-size:14px}
-.form label{display:block;font-size:13px;font-weight:500;color:var(--moon);margin:14px 0 6px}
-.form input,.form textarea{width:100%;font:400 15px var(--body);color:#fff;background:rgba(199,211,234,.06);border:0;border-radius:6px;padding:11px 12px;box-shadow:inset 0 0 0 1px var(--edge);outline:none}
-.form input:focus,.form textarea:focus{box-shadow:inset 0 0 0 1px var(--edge-strong),0 0 0 3px rgba(0,120,208,.3)}
+dl.req dt{color:var(--soft)}
+dl.req dd{margin:0;color:var(--ink)}
+.form{border-radius:20px;padding:30px;background:#fff;box-shadow:0 0 0 1px var(--line),0 24px 50px rgba(11,37,69,.12)}
+.form h3{margin:0 0 4px;font:500 22px var(--display);color:var(--ink)}
+.form .note{margin:0 0 20px;color:var(--muted);font-size:14px}
+.form label{display:block;font-size:13px;font-weight:500;color:var(--text);margin:14px 0 6px}
+.form input,.form textarea{width:100%;font:400 15px var(--body);color:var(--ink);background:#f5f8fb;border:0;border-radius:8px;padding:11px 12px;box-shadow:inset 0 0 0 1px var(--line-2);outline:none}
+.form input:focus,.form textarea:focus{box-shadow:inset 0 0 0 1px var(--blue),0 0 0 3px rgba(0,120,208,.18)}
 .form textarea{resize:vertical;min-height:96px}
-.form ::placeholder{color:rgba(199,211,234,.55)}
-.form .btn-violet{width:100%;margin-top:22px;border-radius:999px}
+.form .btn-blue{width:100%;margin-top:22px}
 
-footer{margin-top:120px;border-top:1px solid var(--edge)}
-footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px;padding-top:32px;padding-bottom:40px;color:var(--fog);font-size:13.5px}
+.port{min-height:95vh;display:flex;align-items:center;justify-content:center;text-align:center;padding-top:120px}
+.port p{color:var(--muted);max-width:520px;margin:14px auto 0;font-size:17px}
+footer{border-top:1px solid var(--line);background:rgba(238,243,248,.85);backdrop-filter:blur(10px)}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px;padding-top:28px;padding-bottom:32px;color:var(--soft);font-size:13.5px}
 
-/* load moment: documents settle into the fan */
-@media (prefers-reduced-motion:no-preference){
-  .doc{animation:settle 1.1s cubic-bezier(.2,.8,.2,1) both}
-  .doc.c{animation-name:settle-c;animation-delay:.05s}
-  .doc.l{animation-delay:.18s}.doc.r{animation-delay:.26s}
-  @keyframes settle{from{opacity:0;transform:rotate(0) translateY(90px)}}
-  @keyframes settle-c{from{opacity:0;transform:translateX(-50%) translateY(70px)}}
-}
-
-@media (max-width:960px){
+@media (max-width:1000px){
   nav.main a:not(.keep){display:none}
-  .lines{grid-template-columns:1fr 1fr}
-  .steps{grid-template-columns:repeat(3,1fr);row-gap:40px}
+  .grid3{grid-template-columns:1fr 1fr}
+  .steps{grid-template-columns:repeat(3,1fr);row-gap:36px}
   .steps::before{display:none}
-  .princ{grid-template-columns:1fr}
-  .princ div+div{box-shadow:0 -1px 0 var(--edge)}
-  .sys,.contact,.gain{grid-template-columns:1fr}
-  .agents{grid-template-columns:1fr 1fr}
-  .hero{min-height:760px}
-  .stage{height:auto;display:flex;flex-direction:column;gap:16px;align-items:center}
-  .doc,.doc.c,.doc.l,.doc.r{position:relative;left:auto;right:auto;transform:none;opacity:1;width:100%;max-width:420px;animation:none}
-  .doc.l,.doc.r{display:none}
+  .chapter{grid-template-columns:1fr;gap:20px}
+  .value,.how{grid-template-columns:1fr 1fr}
+  .pilot,.contact{grid-template-columns:1fr}
+  details.agent .body{grid-template-columns:1fr;padding-left:20px}
 }
-@media (max-width:600px){
+@media (max-width:640px){
   .wrap{padding:0 16px}
-  .hero{padding-top:64px}
-  .lines,.agents{grid-template-columns:1fr}
-  .hero{padding-top:72px;min-height:860px}
+  .veil{background:rgba(238,243,248,.86)}
+  .hero{padding-top:72px}
+  .grid3,.pain,.value,.how{grid-template-columns:1fr}
+  .cost{grid-template-columns:1fr}
+  .cost div:nth-child(2n){border-left:0}
+  .cost div:nth-child(2){border-top:1px solid var(--line)}
   .steps{grid-template-columns:1fr 1fr}
-  .form{padding:24px}
+  details.agent summary .st{display:none}
+  .form{padding:22px}
   dl.req{grid-template-columns:1fr;gap:2px}
   dl.req dd{margin-bottom:10px}
   .bar .btn-ghost{display:none}
@@ -224,55 +175,53 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px;
 </style>
 </head>
 <body>
-<div class="grid-bg" aria-hidden="true"></div>
 <canvas id="flow" aria-hidden="true"></canvas><div class="veil" aria-hidden="true"></div>
 <header><div class="wrap bar">
   <a class="brand" href="#top" aria-label="PRIME FLOW"><svg width="18" height="32" viewBox="180 110 890 1780" aria-hidden="true"><path fill="#0078d0" d="M200 128 1048 612V812L370 1200V1475L200 1575V1105L870 713 370 422V610L530 713 200 905Z"/><path fill="#0078d0" d="M540 1300 1048 1012V1205L710 1400V1775L540 1872Z"/></svg><span>PRIME FLOW</span></a>
-  <nav class="main" aria-label="Main"><a href="#ai">AI system</a><a href="#lines">What we supply</a><a href="#process">How we work</a><a href="#contact">Contact</a><a class="lang keep" href="/" hreflang="ru">RU</a></nav>
+  <nav class="main" aria-label="Main"><a href="#lines">What we supply</a><a href="#process">How we work</a><a href="#ai">AI for procurement</a><a href="#contact">Contact</a><a class="lang keep" href="/" hreflang="ru">RU</a></nav>
   <a class="btn btn-ghost" href="#contact">Send a request</a>
 </div></header>
 
 <main id="top">
-<section class="hero"><div class="halo" aria-hidden="true"></div><div class="wrap">
+<section class="hero"><div class="wrap">
   <p class="eyebrow">A supplier with its own AI system, Tashkent</p>
   <h1 class="wordmark">PRIME FLOW</h1>
-  <p class="lead">AI agents read emails and specifications, assemble documents and watch deadlines — so we answer faster and deliver more accurately. Equipment, spare parts and materials for energy, oil &amp; gas and railways.</p>
-  <div class="cta-row"><a class="btn btn-violet" href="#contact">Send a request</a><a class="btn btn-ghost btn-lg" href="#ai">See how the system works</a></div>
-</div></section>
-
-<section class="block" id="ai"><div class="wrap">
-  <div class="head"><h2>Every delivery runs through our AI system</h2><p>We build our own AI agents for procurement and supply. They take the routine, specialists make the decisions, and every action stays in the log.</p></div>
-  <div class="agents"><article class="card"><div class="top"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18v12H3z"/><path d="M3 7l9 6 9-6"/></svg></span><span class="st live">Live</span></div><h3>Email summaries</h3><p>Every customer email gets a short summary: what is requested and by when.</p></article><article class="card"><div class="top"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/></svg></span><span class="st live">Live</span></div><h3>Document generation</h3><p>Offers, waybills and acceptance acts are built from one data source — no manual copying.</p></article><article class="card"><div class="top"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg></span><span class="st live">Live</span></div><h3>Deadline control</h3><p>Reminders about deliveries, payments and customer replies reach the team in Telegram.</p></article><article class="card"><div class="top"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><path d="M12 12l6-6"/><circle cx="12" cy="12" r="1"/></svg></span><span class="st pilot">Pilot</span></div><h3>Tender monitoring</h3><p>An agent scans tender platforms and shortlists lots that fit our profile.</p></article><article class="card"><div class="top"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg></span><span class="st dev">In development</span></div><h3>Specification analysis</h3><p>Extracts items, requirements, deadlines and risks and drafts the costing.</p></article><article class="card"><div class="top"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M9 14l2 2 4-4"/></svg></span><span class="st dev">In development</span></div><h3>Document checks</h3><p>Matches certificates and passports against the specification and flags gaps.</p></article></div>
-  <div class="gain"><div><h3>What this means for customers</h3><dl><div><dt>Faster answers</dt><dd>Routine never waits for a free specialist — analysis and costing start right away.</dd></div><div><dt>Fewer document errors</dt><dd>Figures, details and items come from one database instead of being retyped.</dd></div><div><dt>Clear delivery status</dt><dd>At any moment we can tell you which stage your order is at and what comes next.</dd></div></dl></div>
-  <div class="frame" aria-hidden="true"><div class="top"><i></i><i></i><i></i></div><div class="feed"><div class="msg"><div class="who">Customer email · 09:42</div>Please confirm the delivery date for the batch and attach a power of attorney for the consignee.<div class="ai"><span>AI summary:</span> The customer asks to confirm the delivery date and send a power of attorney.</div></div><div class="msg"><div class="who">Reminder · 10:00</div>Contract: 5 days left until the planned delivery date.<div class="ai"><span>AI summary:</span> Status: goods in transit, customs clearance scheduled.</div></div></div></div></div>
+  <p class="lead">We supply equipment, spare parts and materials to energy, oil &amp; gas and railway companies — and build AI agents that take the routine off the procurement teams of large organisations.</p>
+  <div class="cta-row"><a class="btn btn-blue" href="#contact">Send a request</a><a class="btn btn-ghost btn-lg" href="#ai">AI for procurement</a></div>
 </div></section>
 
 <section class="block" id="lines"><div class="wrap">
-  <div class="head"><h2>What we supply</h2><p>Goods to the customer&#x27;s specification: original items or equivalent alternatives — with documents that pass acceptance.</p></div>
-  <div class="lines"><article class="card"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z"/></svg></span><h3>Electrical &amp; power</h3><p>Cables, switchgear, panel equipment and components for substations.</p></article><article class="card"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3v18M17 3v18M7 7h10M7 12h10M7 17h10"/></svg></span><h3>Railway signalling</h3><p>Relays, signalling and interlocking equipment and components.</p></article><article class="card"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 14l4-4"/><path d="M3.5 16a9 9 0 1 1 17 0"/><circle cx="12" cy="14" r="1.2"/></svg></span><h3>Instrumentation</h3><p>Sensors, pressure gauges, flow meters, analysers and measuring tools.</p></article><article class="card"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg></span><h3>Machinery &amp; spare parts</h3><p>Pumps, compressors, gearboxes and spare parts by manufacturer part number.</p></article><article class="card"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9v6M21 9v6M3 12h6M15 12h6M9 8l6 8M15 8l-6 8M12 4v4M9 4h6"/></svg></span><h3>Valves &amp; fittings</h3><p>Gate valves, ball valves, fittings and seals for oil &amp; gas and industry.</p></article><article class="card"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/></svg></span><h3>Tools, PPE &amp; MRO</h3><p>Tools, protective equipment, lubricants and consumables a site runs on every day.</p></article></div>
+  <div class="head"><h2>What we supply</h2><p>Goods to the customer&#x27;s specification — with documents that pass acceptance.</p></div>
+  <div class="grid3"><article class="card"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z"/></svg></span><h3>Electrical &amp; power</h3><p>Cables, switchgear, panel equipment and components for substations.</p></article><article class="card"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3v18M17 3v18M7 7h10M7 12h10M7 17h10"/></svg></span><h3>Railway signalling</h3><p>Relays, signalling and interlocking equipment and components.</p></article><article class="card"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 14l4-4"/><path d="M3.5 16a9 9 0 1 1 17 0"/><circle cx="12" cy="14" r="1.2"/></svg></span><h3>Instrumentation</h3><p>Sensors, pressure gauges, flow meters, analysers and measuring tools.</p></article><article class="card"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg></span><h3>Machinery &amp; spare parts</h3><p>Pumps, compressors, gearboxes and spare parts by manufacturer part number.</p></article><article class="card"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9v6M21 9v6M3 12h6M15 12h6M9 8l6 8M15 8l-6 8M12 4v4M9 4h6"/></svg></span><h3>Valves &amp; fittings</h3><p>Gate valves, ball valves, fittings and seals for oil &amp; gas and industry.</p></article><article class="card"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/></svg></span><h3>Tools, PPE &amp; MRO</h3><p>Tools, protective equipment, lubricants and consumables a site runs on every day.</p></article></div>
 </div></section>
 
 <section class="block" id="process"><div class="wrap">
   <div class="head"><h2>From request to warehouse</h2><p>Six steps, each with a document and an owner. You always know where your order is.</p></div>
-  <ol class="steps"><li><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v12H4z"/><path d="M4 13h5l1 2h4l1-2h5"/></svg></span><span class="n"></span><h3>Request</h3><p>We receive the specification, volumes and terms.</p></li><li><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg></span><span class="n"></span><h3>Sourcing</h3><p>We find manufacturers and check specifications.</p></li><li><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/></svg></span><span class="n"></span><h3>Offer</h3><p>One price, lead time, Incoterms and documents.</p></li><li><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/></svg></span><span class="n"></span><h3>Contract</h3><p>We sign the contract and place the order.</p></li><li><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 7h11v9H2zM13 10h4l4 3v3h-8"/><circle cx="6" cy="18" r="1.8"/><circle cx="17" cy="18" r="1.8"/></svg></span><span class="n"></span><h3>Logistics</h3><p>Shipping, customs and deadline control.</p></li><li><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7l9-4 9 4v10l-9 4-9-4z"/><path d="M3 7l9 4 9-4M12 11v10"/></svg></span><span class="n"></span><h3>Delivery</h3><p>Goods handed over with full documentation.</p></li></ol>
+  <ol class="steps"><li><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v12H4z"/><path d="M4 13h5l1 2h4l1-2h5"/></svg></span><span class="n"></span><h3>Request</h3><p>We receive the specification, volumes and terms.</p></li><li><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg></span><span class="n"></span><h3>Sourcing</h3><p>We find manufacturers and check specifications.</p></li><li><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/></svg></span><span class="n"></span><h3>Offer</h3><p>Price, lead time, Incoterms and documents.</p></li><li><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/></svg></span><span class="n"></span><h3>Contract</h3><p>We sign the contract and place the order.</p></li><li><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 7h11v9H2zM13 10h4l4 3v3h-8"/><circle cx="6" cy="18" r="1.8"/><circle cx="17" cy="18" r="1.8"/></svg></span><span class="n"></span><h3>Logistics</h3><p>Shipping, customs and deadline control.</p></li><li><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7l9-4 9 4v10l-9 4-9-4z"/><path d="M3 7l9 4 9-4M12 11v10"/></svg></span><span class="n"></span><h3>Delivery</h3><p>Goods handed over with full documentation.</p></li></ol>
 </div></section>
 
-<section class="block" id="rules"><div class="wrap">
-  <div class="head"><h2>How we handle alternatives and price</h2><p>Rules that stay the same from lot to lot.</p></div>
-  <div class="princ"><div><h3>Original where it matters</h3><p>For technologically complex, project-specific and safety-critical equipment we supply the original only.</p></div><div><h3>Alternatives of equal grade only</h3><p>For simple items we offer an equivalent from a proven manufacturer — to cut cost, not quality.</p></div><div><h3>One offer, one price</h3><p>We submit one offer with a final price. It does not change after submission.</p></div></div>
+<section class="block" id="ai"><div class="wrap">
+  <div class="head"><span class="kicker">AI for the procurement of large organisations</span><h2>Procurement where people decide and AI does the routine</h2><p>We are a supplier and go through the tenders of large companies every day. That is why we build AI agents that take the most time-consuming work off procurement teams.</p></div>
+  <div class="story">
+    <div class="chapter"><div class="label"><span class="num">01 · The pain</span><h3>A familiar picture</h3><p>An ordinary day in a procurement department.</p></div><div><div class="pain"><div class="card"><h4>Specifications dozens of pages long</h4><p>A specialist reads requirements by hand, copies items into spreadsheets and checks them against supplier offers.</p></div><div class="card"><h4>Documents checked by eye</h4><p>Certificates, passports, company details, validity dates — hundreds of details where one missed line becomes a claim.</p></div><div class="card"><h4>Deadlines kept in people&#x27;s heads</h4><p>Deliveries, payments and replies are tracked through email, spreadsheets and personal reminders.</p></div><div class="card"><h4>Decisions that are hard to trace</h4><p>Why this supplier, who approved it and on what basis — during an audit it is pieced together.</p></div></div></div></div>
+    <div class="chapter"><div class="label"><span class="num">02 · The cost</span><h3>What it costs</h3><p>Routine does not look expensive until you count the consequences.</p></div><div><div class="cost"><div><h4>Missed deadlines</h4><p>One late delivery stops a repair or production line and brings penalties.</p></div><div><h4>Repeat procurements</h4><p>An error in a specification or document means running the procedure again and losing weeks.</p></div><div><h4>Risk and audits</h4><p>Opaque decisions invite abuse and difficult conversations with auditors.</p></div><div><h4>Team burnout</h4><p>Strong specialists spend the day copying instead of negotiating and saving budget.</p></div></div></div></div>
+    <div class="chapter"><div class="label"><span class="num">03 · The solution</span><h3>AI agents inside your process</h3><p>Each agent handles one task and hands the result to a person for review. Click an agent to see the details.</p></div><div><div class="agents"><details class="agent"><summary><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg></span><span class="t"><b>Specification analysis</b><span class="s">Requirements, items and risks from any specification</span></span><span class="st dev">In development</span><span class="chev"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" stroke="#0b2545" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary><div class="body"><div><h5>What it does</h5><p>Reads the specification and attachments, extracts items, quantities, technical requirements, deadlines and risks, and drafts the bill of materials.</p></div><div><h5>Stays with people</h5><p>Reviews the draft and decides whether to bid or buy.</p></div><div><h5>Result</h5><p>First-pass analysis never waits for a free specialist.</p></div></div></details><details class="agent"><summary><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M9 14l2 2 4-4"/></svg></span><span class="t"><b>Document checks</b><span class="s">Certificates and passports against requirements</span></span><span class="st dev">In development</span><span class="chev"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" stroke="#0b2545" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary><div class="body"><div><h5>What it does</h5><p>Matches certificates, passports and declarations against the specification, checks validity dates and company details.</p></div><div><h5>Stays with people</h5><p>Reviews only the flagged mismatches.</p></div><div><h5>Result</h5><p>Fewer errors surfacing at acceptance.</p></div></div></details><details class="agent"><summary><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><path d="M12 12l6-6"/><circle cx="12" cy="12" r="1"/></svg></span><span class="t"><b>Tender monitoring</b><span class="s">Relevant lots without manual searching</span></span><span class="st pilot">Pilot</span><span class="chev"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" stroke="#0b2545" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary><div class="body"><div><h5>What it does</h5><p>Scans tender platforms, shortlists lots by profile, value and requirements, and sends a summary morning and afternoon.</p></div><div><h5>Stays with people</h5><p>Decides which lots to pursue.</p></div><div><h5>Result</h5><p>No relevant lot gets lost in the flow.</p></div></div></details><details class="agent"><summary><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/></svg></span><span class="t"><b>Document generation</b><span class="s">Offers, letters, waybills and acts from one database</span></span><span class="st live">Live</span><span class="chev"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" stroke="#0b2545" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary><div class="body"><div><h5>What it does</h5><p>Builds commercial offers, letters, waybills and acceptance acts from a single data source — no manual copying.</p></div><div><h5>Stays with people</h5><p>Reviews, signs and sends.</p></div><div><h5>Result</h5><p>Identical figures and details in every document.</p></div></div></details><details class="agent"><summary><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg></span><span class="t"><b>Deadline control</b><span class="s">Deliveries, payments and replies under watch</span></span><span class="st live">Live</span><span class="chev"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" stroke="#0b2545" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary><div class="body"><div><h5>What it does</h5><p>Tracks delivery, payment and reply deadlines, reminds owners in Telegram and escalates overdue items.</p></div><div><h5>Stays with people</h5><p>Acts on escalations.</p></div><div><h5>Result</h5><p>Deadlines no longer live in people&#x27;s heads.</p></div></div></details><details class="agent"><summary><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18v12H3z"/><path d="M3 7l9 6 9-6"/></svg></span><span class="t"><b>Email summaries</b><span class="s">The point of every email in seconds</span></span><span class="st live">Live</span><span class="chev"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" stroke="#0b2545" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary><div class="body"><div><h5>What it does</h5><p>Every incoming email gets a short summary: who writes, what they ask for and by when.</p></div><div><h5>Stays with people</h5><p>Replies on substance.</p></div><div><h5>Result</h5><p>Mail is handled faster, nothing important is lost.</p></div></div></details><details class="agent"><summary><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v16H5z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span><span class="t"><b>Decision log</b><span class="s">A full trail of every procurement</span></span><span class="st dev">In development</span><span class="chev"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" stroke="#0b2545" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary><div class="body"><div><h5>What it does</h5><p>Records every action of agents and people: who decided what, when and based on which data.</p></div><div><h5>Stays with people</h5><p>Management and auditors see the whole history.</p></div><div><h5>Result</h5><p>Transparency without extra bureaucracy.</p></div></div></details></div></div></div>
+    <div class="chapter"><div class="label"><span class="num">04 · The value</span><h3>What your organisation gets</h3><p>The same people — but their time goes to decisions, not retyping.</p></div><div><div class="value"><div class="card"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 13l4-5"/><path d="M4 18a9 9 0 1 1 16 0"/></svg></span><h4>Speed</h4><p>Routine steps run immediately instead of waiting for a specialist.</p></div><div class="card"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1"/></svg></span><h4>Accuracy</h4><p>Data comes from one database and is checked automatically.</p></div><div class="card"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></span><h4>Transparency</h4><p>A full trail of every procurement for management and audit.</p></div><div class="card"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4a3 3 0 0 0-3 3 3 3 0 0 0-2 5 3 3 0 0 0 2 5 3 3 0 0 0 3 3V4z"/><path d="M15 4a3 3 0 0 1 3 3 3 3 0 0 1 2 5 3 3 0 0 1-2 5 3 3 0 0 1-3 3V4z"/></svg></span><h4>Knowledge stays</h4><p>Team rules and experience live in the agents and do not leave with people.</p></div></div><h3 class="h2" style="font-size:26px;margin-top:40px">How we implement</h3><ol class="how"><li><p>We map your process and pick the area with the most routine.</p></li><li><p>We run a pilot on real data from your procurement.</p></li><li><p>We compare before-and-after metrics: time, errors, deadlines.</p></li><li><p>We scale to other areas and departments.</p></li></ol></div></div>
+  </div>
+  <div class="pilot"><div><h4>We use it ourselves first</h4><p>PRIME FLOW is the system&#x27;s first user: the agents run on our real flow of tenders and deliveries. We only offer clients what we have tested ourselves.</p><a class="btn btn-blue" href="#contact">Discuss a pilot</a></div><div class="feed" aria-hidden="true"><div class="msg"><div class="who">Customer email · 09:42</div>Please confirm the delivery date for the batch and attach a power of attorney for the consignee.<div class="ai"><span>AI summary:</span> The customer asks to confirm the delivery date and send a power of attorney.</div></div><div class="msg"><div class="who">Reminder · 10:00</div>Contract: 5 days left until the planned delivery date.<div class="ai"><span>AI summary:</span> Goods in transit, customs clearance scheduled.</div></div></div></div>
 </div></section>
-
-
 
 <section class="block" id="contact"><div class="wrap contact">
-  <div><h2>Tell us what you need supplied</h2><p class="intro">Send a specification or item list — we reply with a commercial offer.</p><dl class="req"><dt>Company</dt><dd>PRIME FLOW LLC</dd><dt>Tax ID (INN)</dt><dd>312556227</dd><dt>Bank</dt><dd>ASIA ALLIANCE BANK JSC, Tashkent</dd><dt>Bank code (MFO)</dt><dd>01095</dd><dt>Director</dt><dd>Elbek Khamidjonov</dd><dt>Email</dt><dd><a href="mailto:info@primeflow.uz">info@primeflow.uz</a></dd><dt>Phone</dt><dd>+998 90 995 05 99, +998 77 265 51 44</dd><dt>Address</dt><dd>174 Jasorat St, Alisherobod MFY, Mirzo Ulugbek district, Tashkent</dd></dl></div>
+  <div><h2 class="h2">Tell us what you need</h2><p class="intro">Send a supply specification or tell us about the procurement process you want to speed up.</p><dl class="req"><dt>Company</dt><dd>PRIME FLOW LLC</dd><dt>Tax ID (INN)</dt><dd>312556227</dd><dt>Bank</dt><dd>ASIA ALLIANCE BANK JSC, Tashkent</dd><dt>Bank code (MFO)</dt><dd>01095</dd><dt>Director</dt><dd>Elbek Khamidjonov</dd><dt>Email</dt><dd><a href="mailto:info@primeflow.uz">info@primeflow.uz</a></dd><dt>Phone</dt><dd>+998 90 995 05 99, +998 77 265 51 44</dd><dt>Address</dt><dd>174 Jasorat St, Alisherobod MFY, Mirzo Ulugbek district, Tashkent</dd></dl></div>
   <form class="form" id="req-form">
-    <h3>Supply request</h3><p class="note">An email opens with your details filled in — just press Send.</p>
+    <h3>Request</h3><p class="note">An email opens with your details filled in — just press Send.</p>
     <label for="f-name">Name</label><input id="f-name" name="name" type="text" placeholder="Your name"><label for="f-company">Company</label><input id="f-company" name="company" type="text" placeholder="Organisation"><label for="f-email">Email</label><input id="f-email" name="email" type="email" placeholder="name@company.com" required>
-    <label for="f-need">What do you need</label><textarea id="f-need" name="need" placeholder="Items, quantities, deadlines — or attach the specification to the email"></textarea>
-    <button class="btn btn-violet" type="submit">Send a request</button>
+    <label for="f-need">What do you need</label><textarea id="f-need" name="need" placeholder="Items and delivery dates — or a process you want to automate"></textarea>
+    <button class="btn btn-blue" type="submit">Send a request</button>
   </form>
 </div></section>
+
+<section class="port" id="port"><div class="wrap"><h2 class="h2">Cargo at the port of destination</h2><p>Delivery complete: goods unloaded, documents handed over. Next up — your next order.</p></div></section>
 </main>
 
 <footer><div class="wrap"><span>© 2026 PRIME FLOW LLC. Tashkent, Uzbekistan.</span><span><a href="tel:+998909950599">+998 90 995 05 99</a> &nbsp; <a href="tel:+998772655144">+998 77 265 51 44</a> &nbsp; <a href="mailto:info@primeflow.uz">info@primeflow.uz</a></span></div></footer>
@@ -282,7 +231,7 @@ document.getElementById('req-form').addEventListener('submit', function (ev) {
   ev.preventDefault();
   var f = ev.target, L = ['Name', 'Company', 'Email'];
   var body = L[0] + ': ' + f.name.value + '\n' + L[1] + ': ' + f.company.value + '\n' + L[2] + ': ' + f.email.value + '\n\n' + f.need.value;
-  window.location.href = 'mailto:info@primeflow.uz?subject=' + encodeURIComponent('Supply request — primeflow.uz') + '&body=' + encodeURIComponent(body);
+  window.location.href = 'mailto:info@primeflow.uz?subject=' + encodeURIComponent('Request — primeflow.uz') + '&body=' + encodeURIComponent(body);
 });
 </script>
 <script type="module" src="/flow3d.js"></script>
