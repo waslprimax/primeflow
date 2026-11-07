@@ -74,11 +74,18 @@ function init() {
   const convoy = photo(...TRUCK); convoy.userData.body.material.color.set('#eef3f8'); at(convoy, .3);
 
   // ===== zone 2: flight over tiny fields ===============================================
-  const landTex = loadTex('/img/land.webp', THREE.MirroredRepeatWrapping);
+  // one aerial map, rotated so its highway runs straight down and continues the truck's road;
+  // it starts at road scale and zooms out as the plane climbs
+  const FL_W = 320, FL_H = 600, FL_HW = 10 / FL_W, FL_U = 158.5 / FL_W;     // highway width / centre in the tile
+  const landTex = loadTex('/img/flight.webp', THREE.MirroredRepeatWrapping);
   const land = at(flat(landTex, { transparent: false, depthWrite: true }), -.2);
-  const MINI_W = .55;                                                       // tiny highway seen from cruising altitude
+  // sharp road photo laid over the map's highway while we are still low; fades as the map zooms out
   const miniTex = loadTex('/img/road.webp', THREE.MirroredRepeatWrapping); miniTex.wrapS = THREE.ClampToEdgeWrapping;
-  const miniRoad = at(flat(miniTex, { transparent: false, depthWrite: true, color: '#e9eef3' }), -.19);
+  const edgeFade = ctex(64, 4, (g, w, h) => { const l = g.createLinearGradient(0, 0, w, 0); l.addColorStop(0, '#000'); l.addColorStop(.18, '#fff'); l.addColorStop(.82, '#fff'); l.addColorStop(1, '#000'); g.fillStyle = l; g.fillRect(0, 0, w, h); });
+  const miniRoad = at(flat(miniTex, { alphaMap: edgeFade, opacity: 1 }), -.19);
+  const flSteppeTex = loadTex('/img/steppe.webp', THREE.MirroredRepeatWrapping);  // the same steppe, shrinking away below
+  const flSteppe = at(flat(flSteppeTex, { opacity: 1 }), -.195);
+  let flPhase = 0, rdPhase = 0, prevVy = null;
   // soft white bands that hide the seam between zones inside the clouds
   const bandTex = ctex(4, 256, (g, w, h) => { const l = g.createLinearGradient(0, 0, 0, h); l.addColorStop(0, 'rgba(246,249,252,0)'); l.addColorStop(.3, 'rgba(246,249,252,.97)'); l.addColorStop(.7, 'rgba(246,249,252,.97)'); l.addColorStop(1, 'rgba(246,249,252,0)'); g.fillStyle = l; g.fillRect(0, 0, w, h); });
   const bands = [0, 1].map(() => at(flat(bandTex), 1.9));
@@ -241,9 +248,8 @@ function init() {
     steppe.scale.set(gW, top - gBot, 1); steppe.position.set(0, (top + gBot) / 2, 0);
     steppeTex.repeat.set(gW / (TILE_W * .76), (top - gBot) / TILE_H);
     land.scale.set(gW, J1 - J2, 1); land.position.set(0, (J1 + J2) / 2, -.2);
-    landTex.repeat.set(gW / 24, (J1 - J2) / 24);
-    miniRoad.scale.set(MINI_W * 1.12, J1 - J2, 1); miniRoad.position.set(laneX, (J1 + J2) / 2, -.19);
-    miniTex.repeat.set(ROAD_FR * 1.12, (J1 - J2) / (MINI_W / ROAD_FR * 1376 / 768)); miniTex.offset.x = .503 - ROAD_FR * .56;
+    land.userData.gW = gW;
+    miniTex.repeat.x = ROAD_FR * 1.5; miniTex.offset.x = .503 - ROAD_FR * .75;
     bands.forEach((bd, k) => { bd.scale.set(gW, 4.2, 1); bd.position.set(0, k ? J2 : J1, 1.9); });
     const oTop = J2 + 4, oBot = camEnd - visH;
     ocean.scale.set(gW, oTop - oBot, 1); ocean.position.set(0, (oTop + oBot) / 2, -.03);
@@ -305,11 +311,34 @@ function init() {
     convoy.userData.y += dt * (DRIVE - 2.1);                                       // a slower truck ahead in our lane
     convoy.position.set(laneX - LANE, convoy.userData.y, .3); convoy.visible = convoy.userData.y > J1 + 2.5 && convoy.userData.y < vy - 3.8;
 
-    // flight: miniature fields slide slower than the page (parallax), plane shadow far below
+    // flight: the map starts at the truck road's scale and zooms out (the plane climbs)
     land.visible = miniRoad.visible = camY < J1 + visH && camY > J2 - visH;
-    landTex.offset.y = (-camY * .65 + time * .25) / 24;                       // fields lag behind the page: far below
-    miniTex.offset.y = (-camY * .65 + time * .25) / (MINI_W / ROAD_FR * 1376 / 768);
-    planeShadow.visible = plane.visible; planeShadow.position.set(laneX + 2.2, vy - 1.8, .02);
+    const fp = Math.min(1, Math.max(0, (J1 - vy) / Math.max(1, J1 - J2)));
+    const climb = sm(0, .55, fp);                                              // 0 = at road level, 1 = cruising
+    const hwW = ROAD_W * Math.pow(.3 / ROAD_W, climb);                        // on-screen width of the highway
+    const k = hwW / ROAD_W;
+    const Tw = hwW / FL_HW, Th = Tw * FL_H / FL_W;
+    if (prevVy === null) prevVy = vy;
+    const dvy = vy - prevVy; prevVy = vy;
+    flPhase += dvy / Th - dt * DRIVE * .9 / Th;                               // ground is world-locked, plus cruising speed
+    rdPhase += dvy / (TILE_H * k) - dt * DRIVE * .9 / (TILE_H * k);
+    flPhase %= 2; rdPhase %= 2;
+    const gW = land.userData.gW || 40;
+    landTex.repeat.set(gW / Tw, (J1 - J2) / Th);
+    landTex.offset.set(FL_U - (laneX + gW / 2) / Tw, flPhase + (J2 - vy) / Th);
+    miniRoad.scale.set(ROAD_W * 1.5 * k, J1 - J2, 1); miniRoad.position.set(laneX, (J1 + J2) / 2, -.19);
+    miniTex.repeat.y = (J1 - J2) / (TILE_H * k); miniTex.offset.y = rdPhase + (J2 - vy) / (TILE_H * k);
+    miniRoad.material.opacity = 1 - sm(.3, .62, climb);
+    flSteppe.material.opacity = 1 - sm(.22, .58, climb);
+    flSteppe.visible = land.visible && flSteppe.material.opacity > .01;
+    flSteppe.scale.set(gW, J1 - J2, 1); flSteppe.position.set(0, (J1 + J2) / 2, -.195);
+    flSteppeTex.repeat.set(gW / (TILE_W * .76 * k), (J1 - J2) / (TILE_H * k));
+    flSteppeTex.offset.set(.5 - (laneX + gW / 2) / (TILE_W * .76 * k), rdPhase + (J2 - vy) / (TILE_H * k));
+    miniRoad.visible = land.visible && miniRoad.material.opacity > .01;
+    const shS = 1.2 + 2.6 * Math.pow(k, .35) * (1 - climb * .5);
+    planeShadow.scale.set(shS, shS * 874 / 844, 1);
+    planeShadow.material.opacity = .32 - .14 * climb;
+    planeShadow.visible = plane.visible; planeShadow.position.set(laneX + .4 + 1.8 * climb, vy - .4 - 1.6 * climb, .02);
     lowClouds.forEach((c) => {
       const y = camY + visH * .6 - ((c.k * visH * 1.4 + time * .9) % (visH * 1.4));
       c.s.position.set(-halfW + c.x * halfW * 2, y, .05); c.s.material.opacity = .75 * (1 - a) * b;
