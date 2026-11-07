@@ -76,8 +76,8 @@ function init() {
   // ===== zone 2: flight over tiny fields ===============================================
   // one aerial map, rotated so its highway runs straight down and continues the truck's road;
   // it starts at road scale and zooms out as the plane climbs
-  const FL_W = 320, FL_H = 600, FL_HW = 10 / FL_W, FL_U = 158.5 / FL_W;     // highway width / centre in the tile
-  const landTex = loadTex('/img/flight.webp', THREE.MirroredRepeatWrapping);
+  const FL_W = 340, FL_H = 700, FL_HW = 10 / FL_W, FL_U = 199.5 / FL_W;     // highway width / centre in the tile
+  const landTex = loadTex('/img/flight.webp', THREE.RepeatWrapping);      // seamless tile, no mirroring
   const land = at(flat(landTex, { transparent: false, depthWrite: true }), -.2);
   // sharp road photo laid over the map's highway while we are still low; fades as the map zooms out
   const miniTex = loadTex('/img/road.webp', THREE.MirroredRepeatWrapping); miniTex.wrapS = THREE.ClampToEdgeWrapping;
