@@ -33,15 +33,25 @@ function init() {
 
   // sprites --------------------------------------------------------------------------
   const dot = ctex(128, 128, (g) => { const r = g.createRadialGradient(64, 64, 0, 64, 64, 64); r.addColorStop(0, '#fff'); r.addColorStop(.25, 'rgba(255,255,255,.85)'); r.addColorStop(.6, 'rgba(255,255,255,.15)'); r.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = r; g.fillRect(0, 0, 128, 128); });
-  const puffs = [0, 1, 2].map((seed) => ctex(256, 256, (g) => {
-    const rr = mulberry32(seed + 3);
-    for (let i = 0; i < 16; i++) {
-      const x = 56 + rr() * 144, y = 68 + rr() * 120, R = 30 + rr() * 62;
-      const r = g.createRadialGradient(x, y, 0, x, y, R);
-      r.addColorStop(0, 'rgba(255,255,255,.95)'); r.addColorStop(.55, 'rgba(246,249,252,.65)'); r.addColorStop(1, 'rgba(236,243,250,0)');
-      g.fillStyle = r; g.fillRect(0, 0, 256, 256);
-    }
-  }));
+  // fluffy clouds from fractal value noise with a soft round falloff
+  function cloudTex(seed) {
+    const N = 256, rr = mulberry32(seed * 97 + 7), G = 64, grid = new Float32Array((G + 1) * (G + 1)).map(() => rr());
+    const vn = (x, y) => { const xi = Math.floor(x) % G, yi = Math.floor(y) % G, xf = x - Math.floor(x), yf = y - Math.floor(y); const u = xf * xf * (3 - 2 * xf), v = yf * yf * (3 - 2 * yf); const g = (a, b) => grid[(b % G) * (G + 1) + (a % G)]; return (g(xi, yi) * (1 - u) + g(xi + 1, yi) * u) * (1 - v) + (g(xi, yi + 1) * (1 - u) + g(xi + 1, yi + 1) * u) * v; };
+    return ctex(N, N, (g) => {
+      const img = g.createImageData(N, N);
+      const blobs = Array.from({ length: 5 }, () => [N * (.3 + rr() * .4), N * (.3 + rr() * .4), N * (.18 + rr() * .14)]);
+      for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+        let f = 0, amp = .5, fr = 4 / N; for (let o = 0; o < 5; o++) { f += vn(x * fr + seed * 13, y * fr) * amp; amp *= .5; fr *= 2; }
+        let m = 0; for (const [bx, by, br] of blobs) m = Math.max(m, 1 - Math.hypot(x - bx, y - by) / br);
+        const d = Math.min(1, Math.max(0, (m * 1.25 + f - .78) * 2.4));
+        const shade = 236 + Math.round(19 * f);
+        const k = (y * N + x) * 4; img.data[k] = shade; img.data[k + 1] = shade + 2; img.data[k + 2] = 255; img.data[k + 3] = Math.round(d * 245);
+      }
+      g.putImageData(img, 0, 0);
+    });
+  }
+  const puffs = [0, 1, 2, 3].map(cloudTex);
+
 
   // photo cutout with a soft drop shadow (top-down, flat)
   function photo(url, w, h, shadow = [.18, -.12, .4]) {
@@ -54,8 +64,8 @@ function init() {
 
   // ===== zone 1: steppe highway ========================================================
   const ROAD_W = 2.4, ROAD_FR = .175, TILE_W = ROAD_W / ROAD_FR, TILE_H = TILE_W * 1376 / 768, LANE = ROAD_W * .25;
-  const roadTex = loadTex('/img/road.webp'); roadTex.wrapS = THREE.ClampToEdgeWrapping;
-  const steppeTex = loadTex('/img/steppe.webp');
+  const roadTex = loadTex('/img/road.webp', THREE.MirroredRepeatWrapping); roadTex.wrapS = THREE.ClampToEdgeWrapping;
+  const steppeTex = loadTex('/img/steppe.webp', THREE.MirroredRepeatWrapping);
   const steppe = at(flat(steppeTex, { transparent: false, depthWrite: true }), 0);
   const road = at(flat(roadTex, { transparent: false, depthWrite: true }), .01);
   const TRUCK = ['/img/truck.webp', 3.2 * 271 / 1058, 3.2];
@@ -64,15 +74,15 @@ function init() {
   const convoy = photo(...TRUCK); convoy.userData.body.material.color.set('#eef3f8'); at(convoy, .3);
 
   // ===== zone 2: flight over tiny fields ===============================================
-  const landTex = loadTex('/img/land.webp');
+  const landTex = loadTex('/img/land.webp', THREE.MirroredRepeatWrapping);
   const land = at(flat(landTex, { transparent: false, depthWrite: true }), -.2);
   const plane = photo('/img/plane.webp', 4.6, 4.6 * 874 / 844, [0, 0, 0]);
   const planeShadow = flat(plane.userData.body.material.map, { color: 0x0a1424, opacity: .25 }); planeShadow.scale.set(1.9, 1.9 * 874 / 844, 1); at(planeShadow, .02);
-  const lowClouds = Array.from({ length: 22 }, (_, i) => { const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: puffs[i % 3], transparent: true, opacity: 0, depthWrite: false })); s.scale.setScalar(3 + rand() * 4); at(s, .05); return { s, x: rand(), k: rand() }; });
+  const lowClouds = Array.from({ length: 22 }, (_, i) => { const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: puffs[i % 3], transparent: true, opacity: 0, depthWrite: false })); s.scale.setScalar(5 + rand() * 6); at(s, .05); return { s, x: rand(), k: rand() }; });
 
   // ===== zone 3: sea, wake and port =====================================================
   const OCEAN_TILE = 1024 / U;
-  const oceanTex = loadTex('/img/ocean.webp');
+  const oceanTex = loadTex('/img/ocean.webp', THREE.MirroredRepeatWrapping);
   const ocean = at(flat(oceanTex, { transparent: false, depthWrite: true }), -.03);
   const SHIP_L = 5.8, SHIP_W = SHIP_L * 235 / 1187;
   const ship = photo('/img/ship.webp', SHIP_W, SHIP_L, [.16, -.1, .35]);
@@ -134,41 +144,68 @@ function init() {
   // ===== transition clouds ===============================================================
   const junction = [[], []];
   junction.forEach((arr) => { for (let i = 0; i < 110; i++) {
-    const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: puffs[i % 3], transparent: true, opacity: .95, depthWrite: false }));
-    const near = i < 80; s.scale.setScalar(near ? 2.6 + rand() * 3.4 : 4 + rand() * 4); at(s, 2 + rand());
-    arr.push({ s, near, u: rand() * 2 - 1, dy: (rand() * 2 - 1) * (near ? 3.4 : 2.2), op: near ? .97 : .55 });
+    const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: puffs[i % 4], transparent: true, opacity: .95, depthWrite: false }));
+    const near = i < 80; s.scale.setScalar(near ? 5 + rand() * 5 : 7 + rand() * 6); at(s, 2 + rand());
+    arr.push({ s, near, u: rand() * 2 - 1, dy: (rand() * 2 - 1) * (near ? 3.8 : 2.6), op: near ? .97 : .55 });
   } });
 
   // ===== dark band + neural river (right margin) =========================================
   const nightTex = ctex(256, 4, (g, w) => { const l = g.createLinearGradient(0, 0, w, 0); l.addColorStop(0, 'rgba(5,6,15,0)'); l.addColorStop(.35, 'rgba(5,6,15,.92)'); l.addColorStop(1, 'rgba(5,6,15,1)'); g.fillStyle = l; g.fillRect(0, 0, w, 4); });
   const night = at(flat(nightTex), .5);
-  const river = new THREE.Group(); river.position.z = .6; scene.add(river);
-  let nodes = [], edges = [], out = [], pulses = [], pulseGeo;
-  const PULSES = 150;
-  function buildRiver(top, bottom, spread) {
-    river.clear(); nodes = []; edges = [];
-    const n = Math.floor((top - bottom) * 2.6);
+  // a river = layered neural stream. parallax < 1 → further away (slower, softer, larger dots)
+  const flashGeoOf = (n) => { const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(n * 3), 3)); g.setAttribute('size', new THREE.BufferAttribute(new Float32Array(n), 1)); g.setAttribute('alpha', new THREE.BufferAttribute(new Float32Array(n), 1)); return g; };
+  const glowMat = (color) => new THREE.ShaderMaterial({
+    uniforms: { map: { value: dot }, color: { value: new THREE.Color(color) }, dpr: { value: 1 } }, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    vertexShader: 'attribute float size; attribute float alpha; varying float vA; uniform float dpr; void main(){ vA = alpha; gl_PointSize = size * dpr; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.); }',
+    fragmentShader: 'uniform sampler2D map; uniform vec3 color; varying float vA; void main(){ vec4 c = texture2D(map, gl_PointCoord); gl_FragColor = vec4(color * c.a * vA, c.a * vA); }',
+  });
+  const rivers = [];
+  function makeRiver(o) {
+    const group = new THREE.Group(); group.position.z = o.z; scene.add(group);
+    const r = { ...o, group, nodes: [], edges: [], out: [], pulses: [], pulseGeo: null, flashes: [], flashGeo: null, flashMat: glowMat(o.flashColor || '#bfeaff') };
+    rivers.push(r); return r;
+  }
+  function buildRiver(r, top, bottom, spread) {
+    r.group.clear(); const nodes = [], edges = [];
+    const n = Math.floor((top - bottom) * r.density);
     for (let i = 0; i < n; i++) nodes.push(new THREE.Vector3((rand() + rand() + rand() - 1.5) * spread * 1.3, top - (i / n) * (top - bottom) + (rand() - .5) * .5, 0));
-    nodes.sort((a, b) => b.y - a.y);
-    out = nodes.map(() => []);
+    nodes.sort((p, q) => q.y - p.y);
+    const out = nodes.map(() => []);
     nodes.forEach((p, i) => {
       const cand = []; for (let j = i + 1; j < Math.min(nodes.length, i + 12); j++) if (nodes[j].y < p.y - .12) cand.push(j);
-      cand.sort((a, b) => p.distanceTo(nodes[a]) - p.distanceTo(nodes[b])).slice(0, 2 + (rand() < .35)).forEach((j) => { out[i].push(edges.length); edges.push([i, j]); });
+      cand.sort((x, y) => p.distanceTo(nodes[x]) - p.distanceTo(nodes[y])).slice(0, 2 + (rand() < .35)).forEach((j) => { out[i].push(edges.length); edges.push([i, j]); });
     });
     const ng = new THREE.BufferGeometry().setFromPoints(nodes);
     const col = new Float32Array(nodes.length * 3); nodes.forEach((_, i) => BLUE.clone().lerp(CYAN, rand()).toArray(col, i * 3));
     ng.setAttribute('color', new THREE.BufferAttribute(col, 3));
-    const lp = new Float32Array(edges.length * 6); edges.forEach(([a, b], i) => { nodes[a].toArray(lp, i * 6); nodes[b].toArray(lp, i * 6 + 3); });
+    const lp = new Float32Array(edges.length * 6); edges.forEach(([x, y], i) => { nodes[x].toArray(lp, i * 6); nodes[y].toArray(lp, i * 6 + 3); });
     const lg = new THREE.BufferGeometry(); lg.setAttribute('position', new THREE.BufferAttribute(lp, 3));
-    pulseGeo = new THREE.BufferGeometry(); pulseGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(PULSES * 3), 3));
-    river.add(
-      new THREE.LineSegments(lg, new THREE.LineBasicMaterial({ color: CYAN, transparent: true, opacity: .2, depthWrite: false, blending: THREE.AdditiveBlending })),
-      new THREE.Points(ng, new THREE.PointsMaterial({ size: 9, sizeAttenuation: false, map: dot, vertexColors: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending })),
-      new THREE.Points(pulseGeo, new THREE.PointsMaterial({ size: 8, sizeAttenuation: false, map: dot, color: ICE, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending })));
-    river.children.forEach((o) => { o.frustumCulled = false; });
-    pulses = Array.from({ length: PULSES }, () => ({ e: Math.floor(rand() * edges.length), t: rand(), v: .7 + rand() * .7 }));
+    r.pulseGeo = new THREE.BufferGeometry(); r.pulseGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(r.pulsesN * 3), 3));
+    r.flashGeo = flashGeoOf(r.flashN);
+    r.group.add(
+      new THREE.LineSegments(lg, new THREE.LineBasicMaterial({ color: CYAN, transparent: true, opacity: r.lineOp, depthWrite: false, blending: THREE.AdditiveBlending })),
+      new THREE.Points(ng, new THREE.PointsMaterial({ size: r.dotPx, sizeAttenuation: false, map: dot, vertexColors: true, transparent: true, opacity: r.dotOp, depthWrite: false, blending: THREE.AdditiveBlending })),
+      new THREE.Points(r.pulseGeo, new THREE.PointsMaterial({ size: r.dotPx * .9, sizeAttenuation: false, map: dot, color: ICE, transparent: true, opacity: r.dotOp, depthWrite: false, blending: THREE.AdditiveBlending })),
+      new THREE.Points(r.flashGeo, r.flashMat));
+    r.group.children.forEach((c) => { c.frustumCulled = false; });
+    r.flashMat.uniforms.dpr.value = renderer.getPixelRatio();
+    Object.assign(r, { nodes, edges, out });
+    r.pulses = Array.from({ length: r.pulsesN }, () => ({ e: Math.floor(rand() * edges.length), t: rand(), v: .7 + rand() * .7 }));
+    r.flashes = Array.from({ length: r.flashN }, () => ({ life: 0, x: 0, y: 0, s: 1 }));
   }
-  const nearestNode = (y) => { let lo = 0, hi = nodes.length - 1; while (lo < hi) { const m = (lo + hi) >> 1; if (nodes[m].y > y) lo = m + 1; else hi = m; } return lo; };
+  const nearestIn = (nodes, y) => { let lo = 0, hi = nodes.length - 1; while (lo < hi) { const m = (lo + hi) >> 1; if (nodes[m].y > y) lo = m + 1; else hi = m; } return lo; };
+  const farB = makeRiver({ z: .52, parallax: .35, density: 1.4, dotPx: 26, dotOp: .22, lineOp: .05, pulsesN: 40, flashN: 12, speed: .5, flashChance: .15 });
+  const farA = makeRiver({ z: .55, parallax: .6, density: 1.8, dotPx: 17, dotOp: .35, lineOp: .09, pulsesN: 60, flashN: 18, speed: .75, flashChance: .2 });
+  const main = makeRiver({ z: .6, parallax: 1, density: 2.6, dotPx: 9, dotOp: 1, lineOp: .2, pulsesN: 150, flashN: 50, speed: 1.3, flashChance: .35 });
+
+  // data links: main river → the cargo (trailer, plane, ship's container rows)
+  const LINKS = 4;
+  const linkGeo = new THREE.BufferGeometry(); linkGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(LINKS * 2 * 3 * 16), 3));
+  const linkMat = new THREE.LineBasicMaterial({ color: '#0078d0', transparent: true, opacity: .6, depthWrite: false });
+  const linkLines = new THREE.LineSegments(linkGeo, linkMat); linkLines.frustumCulled = false; at(linkLines, .7);
+  const DATA = 40, dataGeo = flashGeoOf(DATA), dataMat = glowMat('#1a8fff'); dataMat.blending = THREE.NormalBlending;
+  const dataPts = new THREE.Points(dataGeo, dataMat); dataPts.frustumCulled = false; at(dataPts, .72);
+  const data = Array.from({ length: DATA }, (_, i) => ({ link: i % LINKS, t: rand(), v: .25 + rand() * .2 }));
 
   const cargo = new THREE.Group(); cargo.add(truck, plane, ship); at(cargo, .3);
 
@@ -189,13 +226,13 @@ function init() {
     J1 = worldY(q('#ai', docH * .3)); J2 = worldY(q('#contact', docH * .75));
     camEnd = -(docH - h) / U;
     const top = visH, gW = halfW * 2 + 4;
-    const gBot = J1 - 4;
+    const gBot = J1 - 7;
     road.scale.set(TILE_W * .5, top - gBot, 1); road.position.set(laneX, (top + gBot) / 2, .01);
     roadTex.repeat.set(.5, (top - gBot) / TILE_H); roadTex.offset.x = .25;
     steppe.scale.set(gW, top - gBot, 1); steppe.position.set(0, (top + gBot) / 2, 0);
     steppeTex.repeat.set(gW / (TILE_W * .76), (top - gBot) / TILE_H);
     land.scale.set(gW, visH + 2, 1);
-    landTex.repeat.set(gW / 9, (visH + 2) / 9);
+    landTex.repeat.set(gW / 24, (visH + 2) / 24);
     const oTop = J2 + 4, oBot = camEnd - visH;
     ocean.scale.set(gW, oTop - oBot, 1); ocean.position.set(0, (oTop + oBot) / 2, -.03);
     oceanTex.repeat.set(gW / OCEAN_TILE, (oTop - oBot) / OCEAN_TILE);
@@ -211,8 +248,12 @@ function init() {
     }
     cranes.forEach((c, i) => { c.cr.position.set(quayEdge + .25, -1.9 + i * 1.9, .12); c.quayX = -1.25; c.shipX = SHIP_W / 2 + .18; c.placed = 0; });
     port.userData = { berthY, quayEdge };
-    river.position.x = riverX;
-    buildRiver(visH, camEnd - visH, narrow ? halfW * .25 : Math.min(1.6, margin * .32));
+    const spread = narrow ? halfW * .25 : Math.min(1.6, margin * .32);
+    [[main, 0], [farA, -.28], [farB, .3]].forEach(([r, dx]) => {
+      r.group.position.x = riverX + dx * Math.max(margin, 2);
+      buildRiver(r, visH, camEnd * r.parallax - visH, spread * (r === main ? 1 : 1.4));
+    });
+    dataMat.uniforms.dpr.value = renderer.getPixelRatio();
     night.visible = !narrow;
     night.scale.set(margin + 2.4, visH + 2, 1);
     cargo.scale.setScalar(narrow ? .7 : 1);
@@ -249,7 +290,7 @@ function init() {
     // flight: miniature fields slide slower than the page (parallax), plane shadow far below
     land.visible = camY < J1 + visH && camY > J2 - visH;
     land.position.set(0, camY, -.2);
-    landTex.offset.y = (camY * .35 - time * .05) / 9;
+    landTex.offset.y = (camY * .35 - time * .05) / 24;
     planeShadow.visible = plane.visible; planeShadow.position.set(laneX + 2.2, vy - 1.8, .02);
     lowClouds.forEach((c) => {
       const y = camY + visH * .6 - ((c.k * visH * 1.4 + time * .9) % (visH * 1.4));
@@ -306,17 +347,59 @@ function init() {
       c.s.position.set(x, J + c.dy, 2); c.s.material.opacity = c.op;
     }));
 
-    // neural river: pulses always flow downward
-    if (pulseGeo) {
-      const arr = pulseGeo.attributes.position.array;
-      pulses.forEach((p, i) => {
-        p.t += dt * p.v * 1.3;
-        if (p.t >= 1) { const end = edges[p.e][1]; p.e = out[end].length ? out[end][Math.floor(rand() * out[end].length)] : p.e; p.t = 0; }
-        let [s, e] = edges[p.e];
-        if (nodes[s].y < camY - visH || nodes[s].y > camY + visH) { const n = nearestNode(camY + visH * .6 - rand() * visH * 1.2); if (out[n] && out[n].length) { p.e = out[n][0]; p.t = rand(); [s, e] = edges[p.e]; } }
-        tmp.lerpVectors(nodes[s], nodes[e], p.t).toArray(arr, i * 3);
+    // neural rivers: pulses flow downward; a node flashes when a pulse reaches it
+    rivers.forEach((r) => {
+      if (!r.pulseGeo) return;
+      r.group.position.y = camY * (1 - r.parallax);
+      const ly = camY * r.parallax, arr = r.pulseGeo.attributes.position.array, { nodes, edges, out } = r;
+      r.pulses.forEach((p, i) => {
+        p.t += dt * p.v * r.speed;
+        if (p.t >= 1) {
+          const end = edges[p.e][1];
+          if (rand() < r.flashChance) { const f = r.flashes.find((q) => q.life <= 0); if (f) { f.life = .55; f.x = nodes[end].x; f.y = nodes[end].y; f.s = .8 + rand() * .6; } }
+          p.e = out[end].length ? out[end][Math.floor(rand() * out[end].length)] : p.e; p.t = 0;
+        }
+        let [a1, b1] = edges[p.e];
+        if (nodes[a1].y < ly - visH || nodes[a1].y > ly + visH) { const n = nearestIn(nodes, ly + visH * .6 - rand() * visH * 1.2); if (out[n] && out[n].length) { p.e = out[n][0]; p.t = rand(); [a1, b1] = edges[p.e]; } }
+        tmp.lerpVectors(nodes[a1], nodes[b1], p.t).toArray(arr, i * 3);
       });
-      pulseGeo.attributes.position.needsUpdate = true;
+      r.pulseGeo.attributes.position.needsUpdate = true;
+      const fp = r.flashGeo.attributes.position.array, fs = r.flashGeo.attributes.size.array, fa = r.flashGeo.attributes.alpha.array;
+      r.flashes.forEach((f, i) => {
+        if (f.life > 0) f.life -= dt;
+        const k = Math.max(0, f.life / .55);                       // 1 → 0
+        fp[i * 3] = f.x; fp[i * 3 + 1] = f.y; fp[i * 3 + 2] = .01;
+        fs[i] = r.dotPx * (1.6 + 4.2 * (1 - k)) * f.s;             // quick ring-like bloom
+        fa[i] = f.life > 0 ? Math.pow(k, 1.6) * (r === main ? .85 : .45) : 0;
+      });
+      r.flashGeo.attributes.position.needsUpdate = true; r.flashGeo.attributes.size.needsUpdate = true; r.flashGeo.attributes.alpha.needsUpdate = true;
+    });
+
+    // data links from the main river to the cargo
+    {
+      const targets = [];
+      const cx = cargo.position.x, cy = cargo.position.y, cs = cargo.scale.x;
+      if (truck.visible) targets.push([cx, cy + .5 * cs], [cx, cy + 1.2 * cs], [cx, cy - .2 * cs], [cx, cy + .9 * cs]);
+      else if (plane.visible) targets.push([cx, cy + .3 * cs], [cx - 1.2 * cs, cy + .1 * cs], [cx + 1.2 * cs, cy + .1 * cs], [cx, cy - .9 * cs]);
+      else targets.push(...[-1.6, -.5, .6, 1.6].map((dy) => [cx, cy + dy * cs]));
+      const lp = linkGeo.attributes.position.array; let k = 0;
+      const curves = targets.map(([tx, ty], li) => {
+        const n = main.nodes[nearestIn(main.nodes, ty + (li - 1.5) * .7)] || new THREE.Vector3();
+        const sx = main.group.position.x + n.x, sy2 = n.y;
+        const c = new THREE.QuadraticBezierCurve3(new THREE.Vector3(sx, sy2, 0), new THREE.Vector3((sx + tx) / 2, Math.max(sy2, ty) + 1.4 + li * .25, 0), new THREE.Vector3(tx, ty, 0));
+        const pts = c.getPoints(16);
+        for (let q = 0; q < 16; q++) { pts[q].toArray(lp, k); pts[q + 1].toArray(lp, k + 3); k += 6; }
+        return c;
+      });
+      linkGeo.attributes.position.needsUpdate = true;
+      linkMat.opacity = .5 + .2 * Math.sin(time * 2.2);
+      const dp = dataGeo.attributes.position.array, ds = dataGeo.attributes.size.array, da = dataGeo.attributes.alpha.array;
+      data.forEach((d, i) => {
+        d.t = (d.t + dt * d.v) % 1;
+        curves[d.link].getPoint(d.t, tmp).toArray(dp, i * 3);
+        ds[i] = 12 + 8 * Math.sin(d.t * Math.PI); da[i] = Math.min(1, Math.sin(d.t * Math.PI) * 1.4);
+      });
+      dataGeo.attributes.position.needsUpdate = true; dataGeo.attributes.size.needsUpdate = true; dataGeo.attributes.alpha.needsUpdate = true;
     }
     renderer.render(scene, camera);
   }
