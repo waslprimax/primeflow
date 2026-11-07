@@ -43,47 +43,44 @@ function init() {
   const at = (o, x, y, z, rx = 0, ry = 0, rz = 0) => { o.position.set(x, y, z); o.rotation.set(rx, ry, rz); return o; };
 
   // vehicles (all point "down" the page: nose toward −y) -----------------------
-  const truck = new THREE.Group();
-  truck.add(at(part(new THREE.BoxGeometry(1.15, 3.2, 1.2), WHITE, .22), 0, .55, .7));
-  truck.add(at(part(new THREE.BoxGeometry(1.17, 3.0, .12), BLUE, .3), 0, .55, 1.0));          // trailer
-  truck.add(at(part(new THREE.BoxGeometry(1.05, 1.0, 1.0), BLUE, .3), 0, -1.6, .6));           // cab
-  truck.add(at(part(new THREE.BoxGeometry(.9, .12, .45), '#8fd3ff', .5), 0, -2.12, .75));            // windshield
-  for (const y of [-1.6, -.2, .5, 1.7]) for (const x of [-.6, .6]) truck.add(at(part(new THREE.CylinderGeometry(.24, .24, .18, 10), TYRE, .4, .3), x, y, .2, 0, 0, Math.PI / 2));
-
-  const plane = new THREE.Group();
-  plane.add(part(new THREE.CylinderGeometry(.42, .34, 4.4, 14), WHITE, .25));                    // fuselage along y
-  plane.add(at(part(new THREE.ConeGeometry(.42, .9, 14), WHITE, .3), 0, -2.65, 0, 0, 0, Math.PI)); // nose
-  plane.add(at(part(new THREE.BoxGeometry(5.6, .95, .1), '#d6e0ec', .22), 0, .1, 0));               // wings
-  plane.add(at(part(new THREE.BoxGeometry(2.0, .5, .08), '#d6e0ec', .22), 0, 1.9, 0));              // stabiliser
-  plane.add(at(part(new THREE.BoxGeometry(.08, .6, .9), BLUE, .22), 0, 1.95, .45));            // fin
-  for (const x of [-1.5, 1.5]) plane.add(at(part(new THREE.CylinderGeometry(.2, .2, .8, 10), STEEL, .3), x, -.35, -.25));
-
-  const ship = new THREE.Group();
-  const hullShape = new THREE.Shape();
-  hullShape.moveTo(-.9, 2.6); hullShape.lineTo(.9, 2.6); hullShape.lineTo(.9, -1.8); hullShape.quadraticCurveTo(.85, -2.9, 0, -3.3); hullShape.quadraticCurveTo(-.85, -2.9, -.9, -1.8); hullShape.closePath();
-  ship.add(part(new THREE.ExtrudeGeometry(hullShape, { depth: .55, bevelEnabled: false }), '#12304d', .28));
-  ship.add(at(part(new THREE.BoxGeometry(1.5, .7, 1.1), WHITE, .3), 0, 2.1, .9));               // bridge
-  for (let r = 0; r < 6; r++) for (let c = 0; c < 2; c++) for (let h = 0; h < (r % 2 ? 2 : 1); h++)
-    ship.add(at(part(new THREE.BoxGeometry(.72, .62, .42), ['#0078d0', '#5cc8f7', '#e46d4c', '#e9eff7', '#1f4e8c'][(r * 3 + c * 2 + h) % 5], .32, .5), c ? .38 : -.38, -1.6 + r * .62, .78 + h * .44));
+  // photoreal top-down cutouts (nose toward −y), each with a soft drop shadow
+  const loader = new THREE.TextureLoader();
+  function photo(url, w, h, shadowOff = .25, shadowOpacity = .45) {
+    const t = loader.load(url); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4;
+    const g = new THREE.Group(), geo = new THREE.PlaneGeometry(w, h);
+    const sh = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ map: t, color: 0x000000, transparent: true, opacity: shadowOpacity, depthWrite: false }));
+    sh.position.set(shadowOff, -shadowOff * .6, -.05); sh.scale.setScalar(1.02); sh.renderOrder = 1;
+    const body = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ map: t, transparent: true, depthWrite: false }));
+    body.renderOrder = 2; g.add(sh, body); g.userData = { sh, body }; return g;
+  }
+  const TRUCK = ['/img/truck.webp', 1.13, 4.4];
+  const truck = photo(...TRUCK, .18, .5);
+  const plane = photo('/img/plane.webp', 6.4, 6.6, 1.6, .28);          // shadow falls far below
+  const ship = photo('/img/ship.webp', 1.6, 8.1, .22, .5);
   const wakeMat = new THREE.LineBasicMaterial({ color: ICE, transparent: true, opacity: .35 });
   const wake = new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints([
-    new THREE.Vector3(-.8, 2.6, .05), new THREE.Vector3(-3.2, 9, .05), new THREE.Vector3(.8, 2.6, .05), new THREE.Vector3(3.2, 9, .05),
-    new THREE.Vector3(-.4, 2.6, .05), new THREE.Vector3(-1.3, 7, .05), new THREE.Vector3(.4, 2.6, .05), new THREE.Vector3(1.3, 7, .05)]), wakeMat);
+    new THREE.Vector3(-.6, 3.9, -.1), new THREE.Vector3(-3.6, 12, -.1), new THREE.Vector3(.6, 3.9, -.1), new THREE.Vector3(3.6, 12, -.1),
+    new THREE.Vector3(-.35, 3.9, -.1), new THREE.Vector3(-1.5, 10, -.1), new THREE.Vector3(.35, 3.9, -.1), new THREE.Vector3(1.5, 10, -.1)]), wakeMat);
   ship.add(wake);
-
+  const foam = new THREE.Sprite(new THREE.SpriteMaterial({ map: dot, color: ICE, transparent: true, opacity: .55, depthWrite: false }));
+  foam.position.set(0, -4.1, -.05); foam.scale.set(1.8, 1.1, 1); ship.add(foam);
   const cargo = new THREE.Group(); cargo.add(truck, plane, ship); scene.add(cargo);
 
   // lanes: road → sky → sea ---------------------------------------------------
   const lane = new THREE.Group(); scene.add(lane);
   const road = new THREE.Group(); lane.add(road);
-  const roadMat = new THREE.MeshBasicMaterial({ color: '#0b1226', transparent: true, opacity: .85, depthWrite: false });
+  const roadMat = new THREE.MeshBasicMaterial({ color: '#1a1f2b', transparent: true, opacity: .92, depthWrite: false });
   const roadPlane = new THREE.Mesh(new THREE.PlaneGeometry(4.2, 1), roadMat); road.add(roadPlane);
-  const edgeMat = new THREE.LineBasicMaterial({ color: CYAN, transparent: true, opacity: .5 });
+  const edgeMat = new THREE.LineBasicMaterial({ color: '#dfe6ee', transparent: true, opacity: .7 });
   const dashMat = new THREE.LineDashedMaterial({ color: ICE, transparent: true, opacity: .55, dashSize: .9, gapSize: .9 });
   let roadEdges, roadDash;
-  // oncoming traffic
+  const dashGeo = new THREE.PlaneGeometry(.14, 1.1), dashMesh = new THREE.MeshBasicMaterial({ color: '#e8edf3', transparent: true, opacity: .8, depthWrite: false });
+  const dashes = Array.from({ length: 16 }, () => { const m = new THREE.Mesh(dashGeo, dashMesh); m.position.z = .02; road.add(m); return m; });
+  // traffic: oncoming trucks face us (nose up) in the right lane; ours and a convoy drive down the left lane
   const traffic = [];
-  for (let i = 0; i < 3; i++) { const t = truck.clone(); t.scale.setScalar(.7); t.rotation.z = Math.PI; road.add(t); traffic.push({ o: t, k: i / 3 }); }
+  const tints = ['#ffffff', '#ffe2d2', '#dfe8f2'];
+  for (let i = 0; i < 3; i++) { const t = photo(...TRUCK, .18, .5); t.userData.body.material.color.set(tints[i]); t.rotation.z = Math.PI; road.add(t); traffic.push({ o: t, k: i / 3 }); }
+  const convoy = photo(...TRUCK, .18, .5); convoy.userData.body.material.color.set('#e8eef6'); road.add(convoy);
 
   const skyClouds = [];
   for (let i = 0; i < 22; i++) { const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: puff, transparent: true, opacity: .0, depthWrite: false })); s.scale.setScalar(2.5 + rand() * 3); scene.add(s); skyClouds.push({ s, x: rand(), k: rand(), z: -2 - rand() * 2 }); }
@@ -145,17 +142,16 @@ function init() {
     const dist = Math.hypot(CAM_BACK, CAM_Z);
     visH = 2 * dist * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)); halfW = visH * camera.aspect / 2;
     const narrow = camera.aspect < .85;
-    laneX = -halfW * (narrow ? .6 : .66); riverX = halfW * (narrow ? .55 : .64);
+    laneX = -halfW * (narrow ? .6 : .76); riverX = halfW * (narrow ? .55 : .64);
     const docH = document.documentElement.scrollHeight;
     const q = (sel, fb) => { const el = document.querySelector(sel); return el ? el.getBoundingClientRect().top + scrollY : fb; };
     J1 = worldY(q('#lines', docH * .35)); J2 = worldY(q('#rules', docH * .7)); END = worldY(docH + h);
     lane.position.x = laneX;
     roadPlane.scale.y = (12 - (J1 - 2)); roadPlane.position.y = (12 + J1 - 2) / 2;
-    if (roadEdges) road.remove(roadEdges, roadDash);
+    if (roadEdges) road.remove(roadEdges);
     const top = 12, bot = J1 - 2;
     roadEdges = new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-2.1, top, .01), new THREE.Vector3(-2.1, bot, .01), new THREE.Vector3(2.1, top, .01), new THREE.Vector3(2.1, bot, .01)]), edgeMat);
-    roadDash = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, top, .02), new THREE.Vector3(0, bot, .02)]), dashMat); roadDash.computeLineDistances();
-    road.add(roadEdges, roadDash);
+    road.add(roadEdges);
     river.position.x = riverX;
     buildRiver(14, END - 10, narrow ? halfW * .3 : Math.min(3.6, halfW * .24));
     const vs = narrow ? .5 : .72; cargo.scale.setScalar(vs);
@@ -171,7 +167,7 @@ function init() {
     if (veil) veil.style.opacity = Math.min(1, scrollY / (innerHeight * .8)).toFixed(3);
 
     // cargo position & morph
-    const vy = camY - visH * .16;
+    const vy = camY - visH * .02;
     const a = sm(J1 - 1.4, J1 + 1.4, vy);            // 1 = still on the road
     const b = sm(J2 - 1.4, J2 + 1.4, vy);            // 1 = still in the air
     const sTruck = a, sPlane = (1 - a) * b, sShip = 1 - b;
@@ -183,8 +179,13 @@ function init() {
     ship.rotation.y = Math.sin(time * .8) * .04; wakeMat.opacity = .25 + .1 * Math.sin(time * 2);
 
     // road dashes flow & oncoming traffic
-    dashMat.dashOffset = -time * 2.2;
-    traffic.forEach((t) => { const span = 26; const y = camY + 12 - ((t.k * span + time * 3.5) % span); t.o.position.set(1.05, y, .3); t.o.visible = y > J1 + 1.5; });
+    // our truck drives forward (down): markings slide up past it
+    const DRIVE = 4.2, P = 2.4;
+    dashes.forEach((d, i) => { const y = Math.floor((camY + 10) / P) * P - i * P + ((time * DRIVE) % P); d.position.set(0, y, .02); d.visible = y < 12 && y > J1 - 2; });
+    // oncoming trucks: relative speed = theirs + ours, they come up the right lane facing us
+    traffic.forEach((t) => { const span = 30, s2 = vy + 16 - ((t.k * span + time * DRIVE * 1.8) % span); t.o.position.set(1.05, s2, .25); t.o.visible = s2 > J1 + 1.5 && s2 < 12; });
+    // convoy truck ahead of us in our lane, slowly pulling away
+    { const y = vy - 7 - ((time * .35) % 4); convoy.position.set(-1.05, y, .25); convoy.scale.setScalar(.72); convoy.visible = y > J1 + 1.5; }
 
     // sky clouds beneath the plane
     skyClouds.forEach((c) => {
