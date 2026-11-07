@@ -43,7 +43,17 @@ nav.main a:hover{color:var(--ice);background:var(--glass-2)}
 .lang:hover{color:var(--ice)}
 
 /* hero */
-.hero{position:relative;text-align:center;padding:96px 0 40px;overflow:hidden}
+.hero{position:relative;text-align:center;padding:112px 0 0;overflow:hidden;min-height:clamp(720px,100vh,980px)}
+.hero .wrap{position:relative;z-index:2}
+#flow{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:0;transition:opacity 1.4s ease}
+#flow.ready{opacity:1}
+.veil{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0;
+  background:linear-gradient(90deg,rgba(5,6,15,.05) 14%,rgba(5,6,15,.74) 32%,rgba(5,6,15,.8) 50%,rgba(5,6,15,.74) 68%,rgba(5,6,15,.05) 86%)}
+@media (max-width:700px){.veil{background:rgba(5,6,15,.62)}}
+main,footer{position:relative;z-index:1}
+.card,.princ div,.frame,.form{backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.card,.princ div{background:rgba(9,12,26,.62)}
+.hero .lead{text-shadow:0 2px 18px rgba(5,6,15,.95);background:radial-gradient(closest-side,rgba(5,6,15,.8),rgba(5,6,15,.45) 70%,transparent);padding:14px 28px}
 .halo{position:absolute;left:50%;top:-140px;width:900px;height:620px;transform:translateX(-50%);z-index:-1;
   background:conic-gradient(from 180deg at 50% 0%,transparent 0deg,rgba(0,120,208,.45) 160deg,rgba(92,200,247,.5) 180deg,rgba(0,120,208,.45) 200deg,transparent 360deg);
   filter:blur(60px);opacity:.55;mask-image:radial-gradient(ellipse at top,#000 20%,transparent 70%)}
@@ -133,6 +143,21 @@ section.block{padding:120px 0 0}
 .msg .ai{margin-top:10px;padding-top:10px;border-top:1px dashed rgba(186,215,247,.14);color:var(--frost)}
 .msg .ai span{color:var(--blueprint)}
 
+.agents{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.agents .card{display:flex;flex-direction:column}
+.agents .top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.st{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:6px;font:500 12px var(--body);white-space:nowrap}
+.st::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.st.live{background:rgba(92,200,247,.12);color:#8fdcfb}
+.st.live::before{box-shadow:0 0 8px currentColor}
+.st.pilot{background:rgba(0,120,208,.18);color:#7fbdf0}
+.st.dev{background:rgba(199,211,234,.08);color:var(--fog)}
+.gain{display:grid;grid-template-columns:1fr 1.1fr;gap:48px;align-items:center;margin-top:72px}
+.gain h3{margin:0 0 20px;font:500 clamp(26px,3vw,34px)/1.2 var(--display);color:var(--ice);letter-spacing:-.02em}
+.gain dl{margin:0;display:grid;gap:20px}
+.gain dt{font:500 17px var(--display);color:var(--ice);margin-bottom:4px}
+.gain dd{margin:0;color:var(--fog);font-size:15.5px}
+
 /* contact */
 .contact{display:grid;grid-template-columns:1fr 440px;gap:56px;align-items:start}
 .contact h2{margin:0 0 16px;font:500 clamp(32px,4.4vw,48px)/1.12 var(--display);letter-spacing:-.025em;
@@ -171,7 +196,9 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px;
   .steps::before{display:none}
   .princ{grid-template-columns:1fr}
   .princ div+div{box-shadow:0 -1px 0 var(--edge)}
-  .sys,.contact{grid-template-columns:1fr}
+  .sys,.contact,.gain{grid-template-columns:1fr}
+  .agents{grid-template-columns:1fr 1fr}
+  .hero{min-height:760px}
   .stage{height:auto;display:flex;flex-direction:column;gap:16px;align-items:center}
   .doc,.doc.c,.doc.l,.doc.r{position:relative;left:auto;right:auto;transform:none;opacity:1;width:100%;max-width:420px;animation:none}
   .doc.l,.doc.r{display:none}
@@ -179,7 +206,8 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px;
 @media (max-width:600px){
   .wrap{padding:0 16px}
   .hero{padding-top:64px}
-  .lines{grid-template-columns:1fr}
+  .lines,.agents{grid-template-columns:1fr}
+  .hero{padding-top:72px;min-height:860px}
   .steps{grid-template-columns:1fr 1fr}
   .form{padding:24px}
   dl.req{grid-template-columns:1fr;gap:2px}
@@ -200,6 +228,10 @@ ICONS = {
  "doc": '<path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/>',
  "pen": '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/>',
  "truck": '<path d="M2 7h11v9H2zM13 10h4l4 3v3h-8"/><circle cx="6" cy="18" r="1.8"/><circle cx="17" cy="18" r="1.8"/>',
+ "mail": '<path d="M3 6h18v12H3z"/><path d="M3 7l9 6 9-6"/>',
+ "bell": '<path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/>',
+ "radar": '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><path d="M12 12l6-6"/><circle cx="12" cy="12" r="1"/>',
+ "check": '<path d="M6 3h9l4 4v14H6z"/><path d="M9 14l2 2 4-4"/>',
  "box": '<path d="M3 7l9-4 9 4v10l-9 4-9-4z"/><path d="M3 7l9 4 9-4M12 11v10"/>',
 }
 def ico(name): return f'<span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true">{ICONS[name]}</svg></span>'
@@ -212,11 +244,11 @@ T = {
   lang="ru", path="/", alt_path="/en/", alt_label="EN",
   title="PRIME FLOW — поставки оборудования и материалов для промышленности Узбекистана",
   desc="ООО «PRIME FLOW»: поставки электротехники, железнодорожной автоматики, КИПиА, оборудования, запчастей и MRO для энергетики, нефтегаза и железной дороги — по тендерам и прямым договорам.",
-  nav=[("#lines","Что поставляем"),("#process","Как работаем"),("#system","Наша система"),("#contact","Контакты")],
+  nav=[("#ai","ИИ-система"),("#lines","Что поставляем"),("#process","Как работаем"),("#contact","Контакты")],
   nav_cta="Отправить заявку",
-  eyebrow="Поставщик промышленных товаров, Ташкент",
-  lead="Поставляем оборудование, запчасти и материалы для энергетики, нефтегаза и железной дороги — по тендерам и прямым договорам, с полным пакетом документов.",
-  cta1="Отправить заявку", cta2="Что мы поставляем",
+  eyebrow="Поставщик с собственной ИИ-системой, Ташкент",
+  lead="ИИ-агенты разбирают письма и техзадания, собирают документы и следят за сроками — поэтому мы отвечаем быстрее и поставляем точнее. Оборудование, запчасти и материалы для энергетики, нефтегаза и железной дороги.",
+  cta1="Отправить заявку", cta2="Как работает система",
   kp=dict(h="Коммерческое предложение", sub="Лот · поставка товаров", rows=[("Позиций","24"),("Срок поставки","45 дней"),("Условия","DAP Ташкент"),("Оплата","по договору")], badge="Готово к подаче"),
   tr=dict(h="Поставка по договору", sub="Отслеживание этапов", steps=[("done","Заказ размещён у производителя",""),("done","Производство и приёмка",""),("now","В пути","таможенное оформление на следующем шаге"),("","Таможня",""),("","Доставка на склад заказчика","")]),
   qd=dict(h="Документы качества", sub="Сверка с техническим заданием", items=[(1,"Сертификат соответствия"),(1,"Паспорт изделия"),(1,"Сертификат происхождения"),(1,"Упаковочный лист"),(0,"Акт приёма-передачи")]),
@@ -233,6 +265,19 @@ T = {
   princ=[("Оригинал там, где это критично","Для технологически сложного, проектного и влияющего на безопасность оборудования поставляем только оригинал."),
          ("Аналог — только равного уровня","Для простых позиций предлагаем равноценный аналог от проверенного производителя, чтобы снизить стоимость, а не качество."),
          ("Одно предложение — одна цена","Подаём одно предложение с окончательной ценой. После подачи цена не меняется.")],
+  ai_h="Каждая поставка проходит через нашу ИИ-систему",
+  ai_p="Мы строим собственных ИИ-агентов для закупок и поставок. Они берут на себя рутину, решения принимают специалисты, а каждое действие остаётся в журнале.",
+  agents=[("mail","Выжимка писем","Каждое письмо заказчика получает краткое содержание: что просят и к какому сроку.","live"),
+          ("doc","Генерация документов","Коммерческие предложения, накладные и акты собираются из одних данных, без ручного копирования.","live"),
+          ("bell","Контроль сроков","Напоминания о поставках, оплатах и ответах заказчику приходят команде в Telegram.","live"),
+          ("radar","Мониторинг тендеров","Агент просматривает тендерные площадки и отбирает лоты под наш профиль.","pilot"),
+          ("search","Разбор техзадания","Выделяет позиции, требования, сроки и риски и готовит черновик расчёта.","dev"),
+          ("check","Сверка документов","Сопоставляет сертификаты и паспорта с техзаданием и подсвечивает расхождения.","dev")],
+  st={"live":"Работает","pilot":"Пилот","dev":"В разработке"},
+  gain_h="Что это даёт заказчику",
+  gain=[("Быстрее ответ на запрос","Рутина не ждёт свободного специалиста — разбор и расчёт начинаются сразу."),
+        ("Меньше ошибок в документах","Цифры, реквизиты и позиции берутся из одной базы, а не перепечатываются."),
+        ("Понятный статус поставки","В любой момент скажем, на каком этапе ваш заказ и что будет дальше.")],
   sys_h="Каждый лот проходит через нашу систему", sys_p1="Мы перевели работу с тендерами и договорами в единую цифровую систему: реестры лотов и договоров, генераторы документов, контроль сроков и уведомления.",
   sys_p2="Рутину берут на себя ИИ-агенты, решения остаются за специалистами.",
   sys_li=["Разбор технического задания и сверка документов качества","Коммерческие предложения, накладные и акты — из одних данных, без ручного копирования","Напоминания о сроках поставки и ответах заказчику","Краткая выжимка каждого входящего письма"],
@@ -251,11 +296,11 @@ T = {
   lang="en", path="/en/", alt_path="/", alt_label="RU",
   title="PRIME FLOW — industrial equipment and materials supply in Uzbekistan",
   desc="PRIME FLOW LLC supplies electrical equipment, railway signalling, instrumentation, machinery, spare parts and MRO to energy, oil & gas and railway companies in Uzbekistan — through tenders and direct contracts.",
-  nav=[("#lines","What we supply"),("#process","How we work"),("#system","Our system"),("#contact","Contact")],
+  nav=[("#ai","AI system"),("#lines","What we supply"),("#process","How we work"),("#contact","Contact")],
   nav_cta="Send a request",
-  eyebrow="Industrial supplier, Tashkent",
-  lead="We supply equipment, spare parts and materials to energy, oil & gas and railway companies — through tenders and direct contracts, with a complete set of documents.",
-  cta1="Send a request", cta2="What we supply",
+  eyebrow="A supplier with its own AI system, Tashkent",
+  lead="AI agents read emails and specifications, assemble documents and watch deadlines — so we answer faster and deliver more accurately. Equipment, spare parts and materials for energy, oil & gas and railways.",
+  cta1="Send a request", cta2="See how the system works",
   kp=dict(h="Commercial offer", sub="Tender lot · goods supply", rows=[("Items","24"),("Lead time","45 days"),("Terms","DAP Tashkent"),("Payment","per contract")], badge="Ready to submit"),
   tr=dict(h="Contract delivery", sub="Stage tracking", steps=[("done","Order placed with manufacturer",""),("done","Production and inspection",""),("now","In transit","customs clearance is next"),("","Customs",""),("","Delivery to customer warehouse","")]),
   qd=dict(h="Quality documents", sub="Checked against the specification", items=[(1,"Certificate of conformity"),(1,"Product passport"),(1,"Certificate of origin"),(1,"Packing list"),(0,"Acceptance certificate")]),
@@ -272,6 +317,19 @@ T = {
   princ=[("Original where it matters","For technologically complex, project-specific and safety-critical equipment we supply the original only."),
          ("Alternatives of equal grade only","For simple items we offer an equivalent from a proven manufacturer — to cut cost, not quality."),
          ("One offer, one price","We submit one offer with a final price. It does not change after submission.")],
+  ai_h="Every delivery runs through our AI system",
+  ai_p="We build our own AI agents for procurement and supply. They take the routine, specialists make the decisions, and every action stays in the log.",
+  agents=[("mail","Email summaries","Every customer email gets a short summary: what is requested and by when.","live"),
+          ("doc","Document generation","Offers, waybills and acceptance acts are built from one data source — no manual copying.","live"),
+          ("bell","Deadline control","Reminders about deliveries, payments and customer replies reach the team in Telegram.","live"),
+          ("radar","Tender monitoring","An agent scans tender platforms and shortlists lots that fit our profile.","pilot"),
+          ("search","Specification analysis","Extracts items, requirements, deadlines and risks and drafts the costing.","dev"),
+          ("check","Document checks","Matches certificates and passports against the specification and flags gaps.","dev")],
+  st={"live":"Live","pilot":"Pilot","dev":"In development"},
+  gain_h="What this means for customers",
+  gain=[("Faster answers","Routine never waits for a free specialist — analysis and costing start right away."),
+        ("Fewer document errors","Figures, details and items come from one database instead of being retyped."),
+        ("Clear delivery status","At any moment we can tell you which stage your order is at and what comes next.")],
   sys_h="Every lot runs through our own system", sys_p1="We moved tenders and contracts into one digital system: lot and contract registries, document generators, deadline control and notifications.",
   sys_p2="AI agents take the routine; specialists keep the decisions.",
   sys_li=["Specification analysis and quality-document checks","Offers, waybills and acceptance acts generated from one data source","Reminders for delivery deadlines and customer replies","A short summary of every incoming customer email"],
@@ -297,6 +355,8 @@ def page(t):
     lines = "".join(f'<article class="card">{ico(i)}<h3>{e(h)}</h3><p>{e(p)}</p></article>' for i, h, p in t["lines"])
     steps = "".join(f'<li>{ico(i)}<span class="n"></span><h3>{e(h)}</h3><p>{e(p)}</p></li>' for i, h, p in t["steps"])
     princ = "".join(f'<div><h3>{e(h)}</h3><p>{e(p)}</p></div>' for h, p in t["princ"])
+    agents = "".join(f'<article class="card"><div class="top">{ico(i)}<span class="st {k}">{e(t["st"][k])}</span></div><h3>{e(h)}</h3><p>{e(p)}</p></article>' for i, h, p, k in t["agents"])
+    gain = "".join(f"<div><dt>{e(h)}</dt><dd>{e(p)}</dd></div>" for h, p in t["gain"])
     sys_li = "".join(f"<li>{e(x)}</li>" for x in t["sys_li"])
     feed = "".join(f'<div class="msg"><div class="who">{e(w)}</div>{e(m)}<div class="ai"><span>{e(t["ai_mark"])}</span> {e(a)}</div></div>' for w, m, a in t["feed"])
     req = "".join(f'<dt>{e(k)}</dt><dd>{f"<a href=\"mailto:{EMAIL}\">{EMAIL}</a>" if v is None else e(v)}</dd>' for k, v in t["req"])
@@ -311,6 +371,7 @@ def page(t):
 <meta name="description" content="{e(t['desc'])}">
 <meta name="theme-color" content="#05060f">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="modulepreload" href="/vendor/three.module.min.js">
 <link rel="alternate" hreflang="ru" href="https://primeflow.uz/">
 <link rel="alternate" hreflang="en" href="https://primeflow.uz/en/">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -319,6 +380,7 @@ def page(t):
 </head>
 <body>
 <div class="grid-bg" aria-hidden="true"></div>
+<canvas id="flow" aria-hidden="true"></canvas><div class="veil" aria-hidden="true"></div>
 <header><div class="wrap bar">
   <a class="brand" href="#top" aria-label="PRIME FLOW">{LOGO}<span>PRIME FLOW</span></a>
   <nav class="main" aria-label="Main">{nav}<a class="lang keep" href="{t['alt_path']}" hreflang="{t['alt_label'].lower()}">{t['alt_label']}</a></nav>
@@ -330,12 +392,14 @@ def page(t):
   <p class="eyebrow">{e(t['eyebrow'])}</p>
   <h1 class="wordmark">PRIME FLOW</h1>
   <p class="lead">{e(t['lead'])}</p>
-  <div class="cta-row"><a class="btn btn-violet" href="#contact">{e(t['cta1'])}</a><a class="btn btn-ghost btn-lg" href="#lines">{e(t['cta2'])}</a></div>
-  <div class="stage" aria-hidden="true">
-    <div class="doc l"><h4>{e(kp['h'])}</h4><div class="sub">{e(kp['sub'])}</div>{kp_rows}<span class="badge ok">{e(kp['badge'])}</span></div>
-    <div class="doc c"><h4>{e(tr['h'])}</h4><div class="sub">{e(tr['sub'])}</div><ul class="track">{tr_li}</ul></div>
-    <div class="doc r"><h4>{e(qd['h'])}</h4><div class="sub">{e(qd['sub'])}</div><ul class="check">{qd_li}</ul></div>
-  </div>
+  <div class="cta-row"><a class="btn btn-violet" href="#contact">{e(t['cta1'])}</a><a class="btn btn-ghost btn-lg" href="#ai">{e(t['cta2'])}</a></div>
+</div></section>
+
+<section class="block" id="ai"><div class="wrap">
+  <div class="head"><h2>{e(t['ai_h'])}</h2><p>{e(t['ai_p'])}</p></div>
+  <div class="agents">{agents}</div>
+  <div class="gain"><div><h3>{e(t['gain_h'])}</h3><dl>{gain}</dl></div>
+  <div class="frame" aria-hidden="true"><div class="top"><i></i><i></i><i></i></div><div class="feed">{feed}</div></div></div>
 </div></section>
 
 <section class="block" id="lines"><div class="wrap">
@@ -348,15 +412,12 @@ def page(t):
   <ol class="steps">{steps}</ol>
 </div></section>
 
-<section class="block"><div class="wrap">
+<section class="block" id="rules"><div class="wrap">
   <div class="head"><h2>{e(t['pr_h'])}</h2><p>{e(t['pr_p'])}</p></div>
   <div class="princ">{princ}</div>
 </div></section>
 
-<section class="block" id="system"><div class="wrap sys">
-  <div class="copy"><h2>{e(t['sys_h'])}</h2><p>{e(t['sys_p1'])}</p><p>{e(t['sys_p2'])}</p><ul>{sys_li}</ul></div>
-  <div class="frame" aria-hidden="true"><div class="top"><i></i><i></i><i></i></div><div class="feed">{feed}</div></div>
-</div></section>
+
 
 <section class="block" id="contact"><div class="wrap contact">
   <div><h2>{e(t['ct_h'])}</h2><p class="intro">{e(t['ct_p'])}</p><dl class="req">{req}</dl></div>
@@ -379,6 +440,7 @@ document.getElementById('req-form').addEventListener('submit', function (ev) {{
   window.location.href = 'mailto:{EMAIL}?subject=' + encodeURIComponent({t['f_subject']!r}) + '&body=' + encodeURIComponent(body);
 }});
 </script>
+<script type="module" src="/flow3d.js"></script>
 </body>
 </html>
 """
@@ -389,4 +451,5 @@ os.makedirs(os.path.join(OUT, "en"), exist_ok=True)
 open(os.path.join(OUT, "index.html"), "w", encoding="utf-8").write(page(T["ru"]))
 open(os.path.join(OUT, "en", "index.html"), "w", encoding="utf-8").write(page(T["en"]))
 open(os.path.join(OUT, "favicon.svg"), "w", encoding="utf-8").write(FAVICON)
+import shutil; shutil.copy(os.path.join(ROOT, "flow3d.js"), os.path.join(OUT, "flow3d.js")); shutil.copytree(os.path.join(ROOT, "vendor"), os.path.join(OUT, "vendor"), dirs_exist_ok=True)
 print("built")

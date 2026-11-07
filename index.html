@@ -7,6 +7,7 @@
 <meta name="description" content="ООО «PRIME FLOW»: поставки электротехники, железнодорожной автоматики, КИПиА, оборудования, запчастей и MRO для энергетики, нефтегаза и железной дороги — по тендерам и прямым договорам.">
 <meta name="theme-color" content="#05060f">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="modulepreload" href="/vendor/three.module.min.js">
 <link rel="alternate" hreflang="ru" href="https://primeflow.uz/">
 <link rel="alternate" hreflang="en" href="https://primeflow.uz/en/">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,7 +50,17 @@ nav.main a:hover{color:var(--ice);background:var(--glass-2)}
 .lang:hover{color:var(--ice)}
 
 /* hero */
-.hero{position:relative;text-align:center;padding:96px 0 40px;overflow:hidden}
+.hero{position:relative;text-align:center;padding:112px 0 0;overflow:hidden;min-height:clamp(720px,100vh,980px)}
+.hero .wrap{position:relative;z-index:2}
+#flow{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:0;transition:opacity 1.4s ease}
+#flow.ready{opacity:1}
+.veil{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0;
+  background:linear-gradient(90deg,rgba(5,6,15,.05) 14%,rgba(5,6,15,.74) 32%,rgba(5,6,15,.8) 50%,rgba(5,6,15,.74) 68%,rgba(5,6,15,.05) 86%)}
+@media (max-width:700px){.veil{background:rgba(5,6,15,.62)}}
+main,footer{position:relative;z-index:1}
+.card,.princ div,.frame,.form{backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.card,.princ div{background:rgba(9,12,26,.62)}
+.hero .lead{text-shadow:0 2px 18px rgba(5,6,15,.95);background:radial-gradient(closest-side,rgba(5,6,15,.8),rgba(5,6,15,.45) 70%,transparent);padding:14px 28px}
 .halo{position:absolute;left:50%;top:-140px;width:900px;height:620px;transform:translateX(-50%);z-index:-1;
   background:conic-gradient(from 180deg at 50% 0%,transparent 0deg,rgba(0,120,208,.45) 160deg,rgba(92,200,247,.5) 180deg,rgba(0,120,208,.45) 200deg,transparent 360deg);
   filter:blur(60px);opacity:.55;mask-image:radial-gradient(ellipse at top,#000 20%,transparent 70%)}
@@ -139,6 +150,21 @@ section.block{padding:120px 0 0}
 .msg .ai{margin-top:10px;padding-top:10px;border-top:1px dashed rgba(186,215,247,.14);color:var(--frost)}
 .msg .ai span{color:var(--blueprint)}
 
+.agents{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.agents .card{display:flex;flex-direction:column}
+.agents .top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.st{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:6px;font:500 12px var(--body);white-space:nowrap}
+.st::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.st.live{background:rgba(92,200,247,.12);color:#8fdcfb}
+.st.live::before{box-shadow:0 0 8px currentColor}
+.st.pilot{background:rgba(0,120,208,.18);color:#7fbdf0}
+.st.dev{background:rgba(199,211,234,.08);color:var(--fog)}
+.gain{display:grid;grid-template-columns:1fr 1.1fr;gap:48px;align-items:center;margin-top:72px}
+.gain h3{margin:0 0 20px;font:500 clamp(26px,3vw,34px)/1.2 var(--display);color:var(--ice);letter-spacing:-.02em}
+.gain dl{margin:0;display:grid;gap:20px}
+.gain dt{font:500 17px var(--display);color:var(--ice);margin-bottom:4px}
+.gain dd{margin:0;color:var(--fog);font-size:15.5px}
+
 /* contact */
 .contact{display:grid;grid-template-columns:1fr 440px;gap:56px;align-items:start}
 .contact h2{margin:0 0 16px;font:500 clamp(32px,4.4vw,48px)/1.12 var(--display);letter-spacing:-.025em;
@@ -177,7 +203,9 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px;
   .steps::before{display:none}
   .princ{grid-template-columns:1fr}
   .princ div+div{box-shadow:0 -1px 0 var(--edge)}
-  .sys,.contact{grid-template-columns:1fr}
+  .sys,.contact,.gain{grid-template-columns:1fr}
+  .agents{grid-template-columns:1fr 1fr}
+  .hero{min-height:760px}
   .stage{height:auto;display:flex;flex-direction:column;gap:16px;align-items:center}
   .doc,.doc.c,.doc.l,.doc.r{position:relative;left:auto;right:auto;transform:none;opacity:1;width:100%;max-width:420px;animation:none}
   .doc.l,.doc.r{display:none}
@@ -185,7 +213,8 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px;
 @media (max-width:600px){
   .wrap{padding:0 16px}
   .hero{padding-top:64px}
-  .lines{grid-template-columns:1fr}
+  .lines,.agents{grid-template-columns:1fr}
+  .hero{padding-top:72px;min-height:860px}
   .steps{grid-template-columns:1fr 1fr}
   .form{padding:24px}
   dl.req{grid-template-columns:1fr;gap:2px}
@@ -196,23 +225,26 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px;
 </head>
 <body>
 <div class="grid-bg" aria-hidden="true"></div>
+<canvas id="flow" aria-hidden="true"></canvas><div class="veil" aria-hidden="true"></div>
 <header><div class="wrap bar">
   <a class="brand" href="#top" aria-label="PRIME FLOW"><svg width="18" height="32" viewBox="180 110 890 1780" aria-hidden="true"><path fill="#0078d0" d="M200 128 1048 612V812L370 1200V1475L200 1575V1105L870 713 370 422V610L530 713 200 905Z"/><path fill="#0078d0" d="M540 1300 1048 1012V1205L710 1400V1775L540 1872Z"/></svg><span>PRIME FLOW</span></a>
-  <nav class="main" aria-label="Main"><a href="#lines">Что поставляем</a><a href="#process">Как работаем</a><a href="#system">Наша система</a><a href="#contact">Контакты</a><a class="lang keep" href="/en/" hreflang="en">EN</a></nav>
+  <nav class="main" aria-label="Main"><a href="#ai">ИИ-система</a><a href="#lines">Что поставляем</a><a href="#process">Как работаем</a><a href="#contact">Контакты</a><a class="lang keep" href="/en/" hreflang="en">EN</a></nav>
   <a class="btn btn-ghost" href="#contact">Отправить заявку</a>
 </div></header>
 
 <main id="top">
 <section class="hero"><div class="halo" aria-hidden="true"></div><div class="wrap">
-  <p class="eyebrow">Поставщик промышленных товаров, Ташкент</p>
+  <p class="eyebrow">Поставщик с собственной ИИ-системой, Ташкент</p>
   <h1 class="wordmark">PRIME FLOW</h1>
-  <p class="lead">Поставляем оборудование, запчасти и материалы для энергетики, нефтегаза и железной дороги — по тендерам и прямым договорам, с полным пакетом документов.</p>
-  <div class="cta-row"><a class="btn btn-violet" href="#contact">Отправить заявку</a><a class="btn btn-ghost btn-lg" href="#lines">Что мы поставляем</a></div>
-  <div class="stage" aria-hidden="true">
-    <div class="doc l"><h4>Коммерческое предложение</h4><div class="sub">Лот · поставка товаров</div><div class="row"><span>Позиций</span><b>24</b></div><div class="row"><span>Срок поставки</span><b>45 дней</b></div><div class="row"><span>Условия</span><b>DAP Ташкент</b></div><div class="row"><span>Оплата</span><b>по договору</b></div><span class="badge ok">Готово к подаче</span></div>
-    <div class="doc c"><h4>Поставка по договору</h4><div class="sub">Отслеживание этапов</div><ul class="track"><li class="done">Заказ размещён у производителя</li><li class="done">Производство и приёмка</li><li class="now">В пути<small>таможенное оформление на следующем шаге</small></li><li class="">Таможня</li><li class="">Доставка на склад заказчика</li></ul></div>
-    <div class="doc r"><h4>Документы качества</h4><div class="sub">Сверка с техническим заданием</div><ul class="check"><li><span class="tick"><svg width="10" height="10" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 6.2 5 8.5l4.5-5" stroke="#5cc8f7" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Сертификат соответствия</li><li><span class="tick"><svg width="10" height="10" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 6.2 5 8.5l4.5-5" stroke="#5cc8f7" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Паспорт изделия</li><li><span class="tick"><svg width="10" height="10" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 6.2 5 8.5l4.5-5" stroke="#5cc8f7" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Сертификат происхождения</li><li><span class="tick"><svg width="10" height="10" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 6.2 5 8.5l4.5-5" stroke="#5cc8f7" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Упаковочный лист</li><li><span class="tick wait"></span>Акт приёма-передачи</li></ul></div>
-  </div>
+  <p class="lead">ИИ-агенты разбирают письма и техзадания, собирают документы и следят за сроками — поэтому мы отвечаем быстрее и поставляем точнее. Оборудование, запчасти и материалы для энергетики, нефтегаза и железной дороги.</p>
+  <div class="cta-row"><a class="btn btn-violet" href="#contact">Отправить заявку</a><a class="btn btn-ghost btn-lg" href="#ai">Как работает система</a></div>
+</div></section>
+
+<section class="block" id="ai"><div class="wrap">
+  <div class="head"><h2>Каждая поставка проходит через нашу ИИ-систему</h2><p>Мы строим собственных ИИ-агентов для закупок и поставок. Они берут на себя рутину, решения принимают специалисты, а каждое действие остаётся в журнале.</p></div>
+  <div class="agents"><article class="card"><div class="top"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18v12H3z"/><path d="M3 7l9 6 9-6"/></svg></span><span class="st live">Работает</span></div><h3>Выжимка писем</h3><p>Каждое письмо заказчика получает краткое содержание: что просят и к какому сроку.</p></article><article class="card"><div class="top"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/></svg></span><span class="st live">Работает</span></div><h3>Генерация документов</h3><p>Коммерческие предложения, накладные и акты собираются из одних данных, без ручного копирования.</p></article><article class="card"><div class="top"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg></span><span class="st live">Работает</span></div><h3>Контроль сроков</h3><p>Напоминания о поставках, оплатах и ответах заказчику приходят команде в Telegram.</p></article><article class="card"><div class="top"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><path d="M12 12l6-6"/><circle cx="12" cy="12" r="1"/></svg></span><span class="st pilot">Пилот</span></div><h3>Мониторинг тендеров</h3><p>Агент просматривает тендерные площадки и отбирает лоты под наш профиль.</p></article><article class="card"><div class="top"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg></span><span class="st dev">В разработке</span></div><h3>Разбор техзадания</h3><p>Выделяет позиции, требования, сроки и риски и готовит черновик расчёта.</p></article><article class="card"><div class="top"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M9 14l2 2 4-4"/></svg></span><span class="st dev">В разработке</span></div><h3>Сверка документов</h3><p>Сопоставляет сертификаты и паспорта с техзаданием и подсвечивает расхождения.</p></article></div>
+  <div class="gain"><div><h3>Что это даёт заказчику</h3><dl><div><dt>Быстрее ответ на запрос</dt><dd>Рутина не ждёт свободного специалиста — разбор и расчёт начинаются сразу.</dd></div><div><dt>Меньше ошибок в документах</dt><dd>Цифры, реквизиты и позиции берутся из одной базы, а не перепечатываются.</dd></div><div><dt>Понятный статус поставки</dt><dd>В любой момент скажем, на каком этапе ваш заказ и что будет дальше.</dd></div></dl></div>
+  <div class="frame" aria-hidden="true"><div class="top"><i></i><i></i><i></i></div><div class="feed"><div class="msg"><div class="who">Письмо заказчика · 09:42</div>Просим подтвердить срок поставки партии и приложить доверенность на получателя.<div class="ai"><span>ИИ-выжимка:</span> Заказчик просит подтвердить срок поставки и прислать доверенность.</div></div><div class="msg"><div class="who">Напоминание · 10:00</div>Договор: до планового срока поставки осталось 5 дней.<div class="ai"><span>ИИ-выжимка:</span> Статус: товар в пути, таможенное оформление запланировано.</div></div></div></div></div>
 </div></section>
 
 <section class="block" id="lines"><div class="wrap">
@@ -225,15 +257,12 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px;
   <ol class="steps"><li><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v12H4z"/><path d="M4 13h5l1 2h4l1-2h5"/></svg></span><span class="n"></span><h3>Заявка</h3><p>Получаем ТЗ, объёмы и условия поставки.</p></li><li><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg></span><span class="n"></span><h3>Подбор</h3><p>Ищем производителей и сверяем спецификации.</p></li><li><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/></svg></span><span class="n"></span><h3>Предложение</h3><p>Одна цена, срок, Incoterms и документы.</p></li><li><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/></svg></span><span class="n"></span><h3>Договор</h3><p>Подписываем договор и размещаем заказ.</p></li><li><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 7h11v9H2zM13 10h4l4 3v3h-8"/><circle cx="6" cy="18" r="1.8"/><circle cx="17" cy="18" r="1.8"/></svg></span><span class="n"></span><h3>Логистика</h3><p>Доставка, таможня и контроль сроков.</p></li><li><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7l9-4 9 4v10l-9 4-9-4z"/><path d="M3 7l9 4 9-4M12 11v10"/></svg></span><span class="n"></span><h3>Поставка</h3><p>Передаём товар с полным пакетом документов.</p></li></ol>
 </div></section>
 
-<section class="block"><div class="wrap">
+<section class="block" id="rules"><div class="wrap">
   <div class="head"><h2>Как мы работаем с аналогами и ценой</h2><p>Правила, которые мы не меняем от лота к лоту.</p></div>
   <div class="princ"><div><h3>Оригинал там, где это критично</h3><p>Для технологически сложного, проектного и влияющего на безопасность оборудования поставляем только оригинал.</p></div><div><h3>Аналог — только равного уровня</h3><p>Для простых позиций предлагаем равноценный аналог от проверенного производителя, чтобы снизить стоимость, а не качество.</p></div><div><h3>Одно предложение — одна цена</h3><p>Подаём одно предложение с окончательной ценой. После подачи цена не меняется.</p></div></div>
 </div></section>
 
-<section class="block" id="system"><div class="wrap sys">
-  <div class="copy"><h2>Каждый лот проходит через нашу систему</h2><p>Мы перевели работу с тендерами и договорами в единую цифровую систему: реестры лотов и договоров, генераторы документов, контроль сроков и уведомления.</p><p>Рутину берут на себя ИИ-агенты, решения остаются за специалистами.</p><ul><li>Разбор технического задания и сверка документов качества</li><li>Коммерческие предложения, накладные и акты — из одних данных, без ручного копирования</li><li>Напоминания о сроках поставки и ответах заказчику</li><li>Краткая выжимка каждого входящего письма</li></ul></div>
-  <div class="frame" aria-hidden="true"><div class="top"><i></i><i></i><i></i></div><div class="feed"><div class="msg"><div class="who">Письмо заказчика · 09:42</div>Просим подтвердить срок поставки партии и приложить доверенность на получателя.<div class="ai"><span>ИИ-выжимка:</span> Заказчик просит подтвердить срок поставки и прислать доверенность.</div></div><div class="msg"><div class="who">Напоминание · 10:00</div>Договор: до планового срока поставки осталось 5 дней.<div class="ai"><span>ИИ-выжимка:</span> Статус: товар в пути, таможенное оформление запланировано.</div></div></div></div>
-</div></section>
+
 
 <section class="block" id="contact"><div class="wrap contact">
   <div><h2>Расскажите, что нужно поставить</h2><p class="intro">Пришлите спецификацию или перечень позиций — ответим коммерческим предложением.</p><dl class="req"><dt>Компания</dt><dd>ООО «PRIME FLOW»</dd><dt>ИНН</dt><dd>312556227</dd><dt>Банк</dt><dd>«ASIA ALLIANCE BANK» АТ, г. Ташкент</dd><dt>МФО</dt><dd>01095</dd><dt>Директор</dt><dd>Хамиджанов Эльбек Улугбекович</dd><dt>Почта</dt><dd><a href="mailto:info@primeflow.uz">info@primeflow.uz</a></dd><dt>Телефон</dt><dd>+998 90 995 05 99, +998 77 265 51 44</dd><dt>Адрес</dt><dd>Ташкент, Мирзо-Улугбекский р-н, МФЙ Алишеробод, ул. Жасорат, 174</dd></dl></div>
@@ -256,5 +285,6 @@ document.getElementById('req-form').addEventListener('submit', function (ev) {
   window.location.href = 'mailto:info@primeflow.uz?subject=' + encodeURIComponent('Заявка на поставку — сайт primeflow.uz') + '&body=' + encodeURIComponent(body);
 });
 </script>
+<script type="module" src="/flow3d.js"></script>
 </body>
 </html>
