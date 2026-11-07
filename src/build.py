@@ -25,7 +25,7 @@ a{color:inherit;text-decoration:none}
 
 #flow{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:0;transition:opacity 1.2s ease}
 #flow.ready{opacity:1}
-.veil{position:fixed;inset:0;z-index:0;pointer-events:none;
+.veil{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0;
   background:linear-gradient(90deg,rgba(238,243,248,0) calc(50% - 560px),rgba(238,243,248,.9) calc(50% - 470px),rgba(238,243,248,.93) 50%,rgba(238,243,248,.9) calc(50% + 470px),rgba(238,243,248,0) calc(50% + 560px))}
 @media (max-width:1180px){.veil{background:linear-gradient(90deg,rgba(238,243,248,.35),rgba(238,243,248,.9) 18%,rgba(238,243,248,.93) 50%,rgba(238,243,248,.9) 82%,rgba(238,243,248,.35))}}
 main,footer{position:relative;z-index:1}
@@ -44,7 +44,20 @@ nav.main a:hover{color:var(--ink);background:rgba(11,37,69,.06)}
 .btn-blue:hover{background:var(--blue-2)}
 .btn-lg{padding:13px 26px;font-size:15px}
 
-.hero{position:relative;text-align:center;padding:120px 0 40px;min-height:clamp(680px,92vh,900px)}
+.hero{position:relative;padding:0;min-height:calc(100vh - 64px);display:flex;align-items:center}
+.hero::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;-webkit-mask-image:linear-gradient(#000 75%,transparent);mask-image:linear-gradient(#000 75%,transparent);
+  background:linear-gradient(90deg,rgba(238,243,248,.98) 0,rgba(238,243,248,.94) calc(50% - 40px),rgba(238,243,248,0) calc(50% + 160px))}
+.hero .wrap{width:100%}
+.hero-copy{max-width:540px;padding:40px 0}
+.hero .eyebrow{justify-content:flex-start}
+.hero .eyebrow::before{display:none}
+.hero .wordmark{font-size:clamp(46px,7.4vw,96px)}
+.hero .lead{margin:24px 0 0;font-size:18px}
+.hero .cta-row{justify-content:flex-start}
+.cue{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:6px;font:400 12px var(--mono);letter-spacing:.06em;color:var(--soft)}
+.cue i{width:1px;height:34px;background:linear-gradient(var(--blue),transparent);animation:cue 1.8s ease-in-out infinite}
+@keyframes cue{0%{transform:scaleY(.2);transform-origin:top}60%{transform:scaleY(1);transform-origin:top}100%{transform:scaleY(1);opacity:0}}
+.win{display:none}
 .eyebrow{display:flex;align-items:center;justify-content:center;gap:14px;font:400 14px var(--mono);letter-spacing:.04em;color:var(--muted);margin:0 0 22px}
 .eyebrow::before,.eyebrow::after{content:"";height:1px;width:48px;background:linear-gradient(90deg,transparent,var(--line-2))}
 .eyebrow::after{transform:scaleX(-1)}
@@ -157,8 +170,25 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px;
 }
 @media (max-width:640px){
   .wrap{padding:0 16px}
-  .veil{background:rgba(238,243,248,.86)}
-  .hero{padding-top:72px}
+  .veil{display:none}
+  /* phones: the journey shows through windows between solid sections */
+  section.block,footer{background:rgba(238,243,248,.96)}
+  section.block{padding-top:72px;padding-bottom:56px}
+  #ai{background:none;padding-top:0}
+  #ai .head,#ai .chapter,#ai .pilot{background:rgba(238,243,248,.96);margin-left:-16px;margin-right:-16px;padding:28px 16px}
+  #ai .head{margin-bottom:0;padding-top:64px}
+  #ai .story{gap:62vh}
+  #ai .pilot{margin-top:0;background:linear-gradient(135deg,#0b2545,#0a4d8c);border-radius:0}
+  #contact{min-height:0;padding:72px 0 56px}
+  .win{display:block;height:64vh}
+  .win-end{height:88vh}
+  .hero{min-height:100svh;align-items:flex-end}
+  .hero::before{-webkit-mask-image:none;mask-image:none;background:linear-gradient(0deg,rgba(238,243,248,1) 0,rgba(238,243,248,.97) 50%,rgba(238,243,248,0) 66%)}
+  .hero-copy{padding:0 0 64px}
+  .hero .wordmark{font-size:44px}
+  .hero .lead{font-size:16px;margin-top:16px}
+  .hero .cta-row{margin-top:24px}
+  .cue{bottom:14px}
   .grid3,.pain,.value,.how{grid-template-columns:1fr}
   .cost{grid-template-columns:1fr}
   .cost div:nth-child(2n){border-left:0}
@@ -206,7 +236,7 @@ T = {
   desc="ООО «PRIME FLOW»: поставки оборудования, запчастей и материалов для энергетики, нефтегаза и железной дороги. Собственные ИИ-агенты для закупок крупных организаций.",
   nav=[("#lines","Что поставляем"),("#process","Как работаем"),("#ai","ИИ для закупок"),("#contact","Контакты")],
   nav_cta="Отправить заявку",
-  eyebrow="Поставщик с собственной ИИ-системой, Ташкент",
+  eyebrow="Поставщик с собственной ИИ-системой, Ташкент", cue="листайте",
   lead="Поставляем оборудование, запчасти и материалы для энергетики, нефтегаза и железной дороги — и строим ИИ-агентов, которые снимают рутину с закупок крупных организаций.",
   cta1="Отправить заявку", cta2="ИИ для закупок",
   lines_h="Что мы поставляем", lines_p="Товары по спецификации заказчика — с документами, которые проходят приёмку.",
@@ -278,7 +308,7 @@ T = {
   desc="PRIME FLOW LLC supplies equipment, spare parts and materials to energy, oil & gas and railway companies in Uzbekistan, and builds AI agents for the procurement teams of large organisations.",
   nav=[("#lines","What we supply"),("#process","How we work"),("#ai","AI for procurement"),("#contact","Contact")],
   nav_cta="Send a request",
-  eyebrow="A supplier with its own AI system, Tashkent",
+  eyebrow="A supplier with its own AI system, Tashkent", cue="scroll",
   lead="We supply equipment, spare parts and materials to energy, oil & gas and railway companies — and build AI agents that take the routine off the procurement teams of large organisations.",
   cta1="Send a request", cta2="AI for procurement",
   lines_h="What we supply", lines_p="Goods to the customer's specification — with documents that pass acceptance.",
@@ -390,23 +420,26 @@ def page(t):
 </div></header>
 
 <main id="top">
-<section class="hero"><div class="wrap">
+<section class="hero" id="intro"><div class="wrap"><div class="hero-copy">
   <p class="eyebrow">{e(t['eyebrow'])}</p>
   <h1 class="wordmark">PRIME FLOW</h1>
   <p class="lead">{e(t['lead'])}</p>
   <div class="cta-row"><a class="btn btn-blue" href="#contact">{e(t['cta1'])}</a><a class="btn btn-ghost btn-lg" href="#ai">{e(t['cta2'])}</a></div>
-</div></section>
+</div></div><div class="cue" aria-hidden="true">{e(t['cue'])}<i></i></div></section>
+<div class="win" aria-hidden="true"></div>
 
 <section class="block" id="lines"><div class="wrap">
   <div class="head"><h2>{e(t['lines_h'])}</h2><p>{e(t['lines_p'])}</p></div>
   <div class="grid3">{lines}</div>
 </div></section>
 
+<div class="win" aria-hidden="true"></div>
 <section class="block" id="process"><div class="wrap">
   <div class="head"><h2>{e(t['proc_h'])}</h2><p>{e(t['proc_p'])}</p></div>
   <ol class="steps">{steps}</ol>
 </div></section>
 
+<div class="win" aria-hidden="true"></div>
 <section class="block" id="ai"><div class="wrap">
   <div class="head"><span class="kicker">{e(t['ai_kicker'])}</span><h2>{e(t['ai_h'])}</h2><p>{e(t['ai_p'])}</p></div>
   <div class="story">
@@ -418,6 +451,7 @@ def page(t):
   <div class="pilot"><div><h4>{e(t['pilot_h'])}</h4><p>{e(t['pilot_p'])}</p><a class="btn btn-blue" href="#contact">{e(t['pilot_cta'])}</a></div><div class="feed" aria-hidden="true">{feed}</div></div>
 </div></section>
 
+<div class="win" aria-hidden="true"></div>
 <section class="block" id="contact"><div class="wrap contact">
   <div><h2 class="h2">{e(t['ct_h'])}</h2><p class="intro">{e(t['ct_p'])}</p><dl class="req">{req}</dl></div>
   <form class="form" id="req-form">
@@ -427,7 +461,7 @@ def page(t):
     <button class="btn btn-blue" type="submit">{e(t['f_btn'])}</button>
   </form>
 </div></section>
-
+<div class="win win-end" aria-hidden="true"></div>
 </main>
 
 <footer><div class="wrap"><span>{e(t['foot'])}</span><span><a href="tel:+998909950599">+998 90 995 05 99</a> &nbsp; <a href="tel:+998772655144">+998 77 265 51 44</a> &nbsp; <a href="mailto:{EMAIL}">{EMAIL}</a></span></div></footer>

@@ -21,6 +21,10 @@ function init() {
   const scene = new THREE.Scene();
   const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, .1, 200);
   camera.position.z = 100;
+  const camN = new THREE.OrthographicCamera(-1, 1, 1, -1, .1, 200);       // neural layer: never zooms
+  camN.position.z = 100; camN.layers.set(1);
+  const NL = (o) => { o.layers.set(1); return o; };
+  renderer.autoClear = false;
   const BLUE = new THREE.Color('#0078d0'), CYAN = new THREE.Color('#5cc8f7'), ICE = new THREE.Color('#eef8ff');
   const rand = mulberry32(11);
   const sm = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
@@ -72,6 +76,53 @@ function init() {
   const truck = photo(...TRUCK);
   const traffic = [0, 1, 2].map((i) => { const t = photo(...TRUCK); t.rotation.z = Math.PI; t.userData.body.material.color.set(['#ffffff', '#ffe5d6', '#e2ecf6'][i]); at(t, .3); return { o: t, k: i / 3 }; });
   const convoy = photo(...TRUCK); convoy.userData.body.material.color.set('#eef3f8'); at(convoy, .3);
+
+  // ===== intro: a PRIME FLOW box is loaded into the truck at the warehouse ==================
+  const LOGO_P = ['M200 128 1048 612V812L370 1200V1475L200 1575V1105L870 713 370 422V610L530 713 200 905Z', 'M540 1300 1048 1012V1205L710 1400V1775L540 1872Z'].map((d) => new Path2D(d));
+  const logoAt = (g, x, y, h, color) => { g.save(); g.translate(x, y); const k = h / 1780; g.scale(k, k); g.translate(-180, -110); g.fillStyle = color; LOGO_P.forEach((q) => g.fill(q)); g.restore(); };
+  const redrawable = (w, h, draw) => { const t = ctex(w, h, draw); t.userData.redraw = () => { const g = t.image.getContext('2d'); g.clearRect(0, 0, w, h); draw(g, w, h); t.needsUpdate = true; }; return t; };
+  const cartonTex = redrawable(512, 512, (g, w, h) => {
+    const r = mulberry32(3);
+    g.fillStyle = '#c69c66'; g.fillRect(0, 0, w, h);
+    for (let i = 0; i < 9000; i++) { g.fillStyle = `rgba(${r() < .5 ? '96,62,24' : '255,236,200'},${r() * .08})`; g.fillRect(r() * w, r() * h, 1 + r() * 4, 1); }
+    g.fillStyle = 'rgba(84,52,18,.4)'; g.fillRect(w / 2 - 1.5, 0, 3, h);                       // flap seam
+    g.fillStyle = 'rgba(236,214,168,.42)'; g.fillRect(w / 2 - 36, 0, 72, h);                   // clear tape
+    g.fillStyle = 'rgba(255,255,255,.22)'; g.fillRect(w / 2 - 30, 0, 9, h);
+    [[0, 0, w, 0], [0, 0, 0, h]].forEach(([x0, y0, x1, y1]) => { const l = g.createLinearGradient(x0, y0, x1, y1); l.addColorStop(0, 'rgba(60,34,8,.4)'); l.addColorStop(.06, 'rgba(60,34,8,0)'); l.addColorStop(.94, 'rgba(60,34,8,0)'); l.addColorStop(1, 'rgba(60,34,8,.4)'); g.fillStyle = l; g.fillRect(0, 0, w, h); });
+    logoAt(g, w / 2 - 30, 64, 112, '#0a5fae');
+    g.fillStyle = '#0a5fae'; g.textAlign = 'center'; g.font = '600 60px Montserrat, "Space Grotesk", sans-serif'; g.fillText('PRIME FLOW', w / 2, 248);
+    g.font = '500 21px "JetBrains Mono", monospace'; g.fillStyle = 'rgba(12,38,72,.8)'; g.fillText('primeflow.uz', w / 2, 284);
+    g.strokeStyle = 'rgba(20,20,20,.8)'; g.lineWidth = 6; g.lineCap = 'round';                   // "this side up"
+    [44, 84].forEach((x) => { g.beginPath(); g.moveTo(x, 470); g.lineTo(x, 400); g.moveTo(x - 16, 418); g.lineTo(x, 400); g.lineTo(x + 16, 418); g.stroke(); });
+    g.fillStyle = '#f6f3ec'; g.fillRect(w - 206, h - 158, 176, 124);                          // shipping label
+    g.fillStyle = '#1b1b1b'; for (let x = w - 192; x < w - 44; x += 3 + Math.floor(r() * 3)) g.fillRect(x, h - 146, 1 + Math.floor(r() * 3), 46);
+    g.textAlign = 'left'; g.font = '600 15px "JetBrains Mono", monospace'; g.fillText('PF-2611  24 kg', w - 192, h - 78); g.font = '500 13px "JetBrains Mono", monospace'; g.fillText('TASHKENT  UZ', w - 192, h - 56);
+  });
+  const roofTex = redrawable(1024, 1024, (g, w, h) => {
+    g.fillStyle = '#9aa3ac'; g.fillRect(0, 0, w, h);
+    for (let x = 0; x < w; x += 14) { g.fillStyle = 'rgba(255,255,255,.16)'; g.fillRect(x, 0, 3, h); g.fillStyle = 'rgba(30,40,50,.13)'; g.fillRect(x + 8, 0, 3, h); }
+    g.fillStyle = 'rgba(210,232,248,.55)'; [150, 860].forEach((x) => g.fillRect(x, 30, 26, h - 60));
+    logoAt(g, w / 2 - 300, h - 372, 170, 'rgba(255,255,255,.92)');
+    g.fillStyle = 'rgba(255,255,255,.92)'; g.textAlign = 'left'; g.font = '600 118px Montserrat, "Space Grotesk", sans-serif'; g.fillText('PRIME FLOW', w / 2 - 190, h - 244);
+    g.fillStyle = '#6f7983'; g.fillRect(0, h - 16, w, 16); g.fillStyle = 'rgba(255,255,255,.35)'; g.fillRect(0, h - 18, w, 2);
+  });
+  const apronTex = ctex(1024, 128, (g, w, h) => {
+    g.fillStyle = '#c3c8cd'; g.fillRect(0, 0, w, h);
+    for (let i = 0; i < 3000; i++) { g.fillStyle = `rgba(${Math.random() < .5 ? '255,255,255' : '40,50,60'},${Math.random() * .08})`; g.fillRect(Math.random() * w, Math.random() * h, 2, 2); }
+    const bx = w / 2 - 58, bw = 116;                                                          // dock leveler (steel plate)
+    g.fillStyle = '#8c949b'; g.fillRect(bx, 0, bw, h - 22);
+    g.fillStyle = 'rgba(255,255,255,.28)'; for (let y = 6; y < h - 26; y += 10) for (let x = bx + 4 + (y % 20 ? 5 : 0); x < bx + bw - 4; x += 10) g.fillRect(x, y, 5, 2);
+    for (let x = bx - 30; x < bx + bw + 30; x += 20) { g.fillStyle = (x / 20) % 2 ? '#f2c230' : '#1d1d1d'; g.beginPath(); g.moveTo(x, h); g.lineTo(x + 10, h - 22); g.lineTo(x + 30, h - 22); g.lineTo(x + 20, h); g.fill(); }
+    g.fillStyle = '#222'; g.fillRect(bx - 22, 0, 16, 34); g.fillRect(bx + bw + 6, 0, 16, 34);  // bumpers
+  });
+  const palletTex = ctex(128, 128, (g, w, h) => { g.fillStyle = 'rgba(40,28,14,.85)'; g.fillRect(0, 0, w, h); g.fillStyle = '#b8895a'; for (let y = 4; y < h; y += 25) g.fillRect(2, y, w - 4, 17); });
+  const apron = at(flat(apronTex, { transparent: false, depthWrite: true }), .2);
+  const roofShade = at(flat(ctex(4, 64, (g, w, h) => { const l = g.createLinearGradient(0, 0, 0, h); l.addColorStop(0, 'rgba(10,20,36,.45)'); l.addColorStop(1, 'rgba(10,20,36,0)'); g.fillStyle = l; g.fillRect(0, 0, w, h); })), .21);
+  const roof = at(flat(roofTex), .36);
+  const BOX = .62;
+  const loadBox = new THREE.Group(); at(loadBox, .295);
+  { const pl = flat(palletTex); pl.scale.set(BOX * 1.16, BOX * 1.16, 1); const sh = flat(cartonTex, { color: 0x0a1424, opacity: .35 }); sh.scale.set(BOX, BOX, 1); sh.position.set(.05, -.05, .001); const bx = flat(cartonTex); bx.scale.set(BOX, BOX, 1); bx.position.z = .002; loadBox.add(pl, sh, bx); }
+  if (document.fonts) document.fonts.ready.then(() => { cartonTex.userData.redraw(); roofTex.userData.redraw(); });
 
   // ===== zone 2: flight over tiny fields ===============================================
   // one aerial map, rotated so its highway runs straight down and continues the truck's road;
@@ -167,7 +218,7 @@ function init() {
 
   // ===== dark band + neural river (right margin) =========================================
   const nightTex = ctex(256, 4, (g, w) => { const l = g.createLinearGradient(0, 0, w, 0); l.addColorStop(0, 'rgba(5,6,15,0)'); l.addColorStop(.35, 'rgba(5,6,15,.92)'); l.addColorStop(1, 'rgba(5,6,15,1)'); g.fillStyle = l; g.fillRect(0, 0, w, 4); });
-  const night = at(flat(nightTex), .5);
+  const night = NL(at(flat(nightTex), .5));
   // a river = layered neural stream. parallax < 1 → further away (slower, softer, larger dots)
   const flashGeoOf = (n) => { const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(n * 3), 3)); g.setAttribute('size', new THREE.BufferAttribute(new Float32Array(n), 1)); g.setAttribute('alpha', new THREE.BufferAttribute(new Float32Array(n), 1)); return g; };
   const glowMat = (color) => new THREE.ShaderMaterial({
@@ -203,7 +254,7 @@ function init() {
       new THREE.Points(ng, new THREE.PointsMaterial({ size: r.dotPx, sizeAttenuation: false, map: dot, vertexColors: true, transparent: true, opacity: r.dotOp, depthWrite: false, blending: THREE.AdditiveBlending })),
       new THREE.Points(r.pulseGeo, new THREE.PointsMaterial({ size: r.dotPx * .9, sizeAttenuation: false, map: dot, color: ICE, transparent: true, opacity: r.dotOp, depthWrite: false, blending: THREE.AdditiveBlending })),
       new THREE.Points(r.flashGeo, r.flashMat));
-    r.group.children.forEach((c) => { c.frustumCulled = false; });
+    r.group.children.forEach((c) => { c.frustumCulled = false; c.layers.set(1); });
     r.flashMat.uniforms.dpr.value = renderer.getPixelRatio();
     Object.assign(r, { nodes, edges, out });
     r.pulses = Array.from({ length: r.pulsesN }, () => ({ e: Math.floor(rand() * edges.length), t: rand(), v: .7 + rand() * .7 }));
@@ -218,30 +269,43 @@ function init() {
   const LINKS = 2;
   const linkGeo = new THREE.BufferGeometry(); linkGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(LINKS * 2 * 3 * 16), 3));
   const linkMat = new THREE.LineBasicMaterial({ color: '#0078d0', transparent: true, opacity: .6, depthWrite: false });
-  const linkLines = new THREE.LineSegments(linkGeo, linkMat); linkLines.frustumCulled = false; at(linkLines, .7);
+  const linkLines = NL(new THREE.LineSegments(linkGeo, linkMat)); linkLines.frustumCulled = false; at(linkLines, .7);
   const DATA = 40, dataGeo = flashGeoOf(DATA), dataMat = glowMat('#1a8fff'); dataMat.blending = THREE.NormalBlending;
-  const dataPts = new THREE.Points(dataGeo, dataMat); dataPts.frustumCulled = false; at(dataPts, .72);
+  const dataPts = NL(new THREE.Points(dataGeo, dataMat)); dataPts.frustumCulled = false; at(dataPts, .72);
   const data = Array.from({ length: DATA }, (_, i) => ({ link: i % LINKS, dir: (i >> 1) % 2 ? -1 : 1, t: rand(), v: .22 + rand() * .2 }));
 
   const cargo = new THREE.Group(); cargo.add(truck, plane, ship); at(cargo, .3);
 
   // ===== layout =============================================================================
-  let visH = 15, halfW = 12, laneX = -9, riverX = 9, margin = 4, J1 = -30, J2 = -60, camEnd = -100, narrow = false;
+  let visH = 15, halfW = 12, laneX = -9, riverX = 9, margin = 4, J1 = -30, J2 = -60, camEnd = -100, narrow = false, mobile = false;
+  let TX = -9, DOCK_Y = 2, CS = 1, nightW = 6, heroH = 800;
+  const veil = document.querySelector('.veil'); let veilOp = -1;
   const worldY = (docY) => -(docY - innerHeight * .5) / U;
   function layout() {
     const w = innerWidth, h = innerHeight;
+    mobile = w <= 640;
+    renderer.setPixelRatio(Math.min(devicePixelRatio, mobile ? 1.5 : 2));
     renderer.setSize(w, h, false);
     visH = h / U; halfW = w / U / 2;
-    camera.left = -halfW; camera.right = halfW; camera.top = visH / 2; camera.bottom = -visH / 2; camera.updateProjectionMatrix();
+    [camera, camN].forEach((c) => { c.left = -halfW; c.right = halfW; c.top = visH / 2; c.bottom = -visH / 2; c.updateProjectionMatrix(); });
     margin = Math.max(0, (w - 1000) / 2) / U;
     narrow = margin < 2.2;
-    laneX = narrow ? -halfW * .55 : -halfW + margin * .5;
-    riverX = narrow ? halfW * .55 : halfW - margin * .5;
+    laneX = mobile ? -halfW * .24 : narrow ? -halfW * .55 : -halfW + margin * .5;
+    riverX = mobile ? halfW * .66 : narrow ? halfW * .55 : halfW - margin * .5;
+    nightW = mobile ? halfW * .8 : margin + 2.4;
+    CS = mobile ? .8 : narrow ? .7 : 1;
+    TX = laneX - LANE; DOCK_Y = visH * .04 + 1.6 * CS + .02;
+    heroH = (document.getElementById('intro') || {}).offsetHeight || h;
+    apron.scale.set(9, .9, 1); apron.position.set(TX, DOCK_Y + .45, .2);
+    roofShade.scale.set(9, .45, 1); roofShade.position.set(TX, DOCK_Y + .9 - .225, .21);
+    roof.scale.set(9, 9, 1); roof.position.set(TX, DOCK_Y + .9 + 4.5, .36);
+    junction.forEach((arr) => arr.forEach((c, i) => { c.s.visible = !mobile || i % 2 === 0; }));
+    farB.group.visible = !mobile;
     const docH = document.documentElement.scrollHeight;
     const q = (sel, fb) => { const el = document.querySelector(sel); return el ? el.getBoundingClientRect().top + scrollY : fb; };
     J1 = worldY(q('#ai', docH * .3)); J2 = worldY(q('#contact', docH * .75));
     camEnd = -(docH - h) / U;
-    const top = visH, gW = halfW * 2 + 4;
+    const top = visH + 14, gW = halfW * 2 + 30;
     const gBot = J1;
     road.scale.set(TILE_W * .5, top - gBot, 1); road.position.set(laneX, (top + gBot) / 2, .01);
     roadTex.repeat.set(.5, (top - gBot) / TILE_H); roadTex.offset.x = .25;
@@ -266,15 +330,15 @@ function init() {
     }
     cranes.forEach((c, i) => { c.cr.position.set(quayEdge + .25, -1.9 + i * 1.9, .12); c.quayX = -.75; c.shipX = SHIP_W / 2 + .18; c.placed = 0; });
     port.userData = { berthY, quayEdge };
-    const spread = narrow ? halfW * .25 : Math.min(1.6, margin * .32);
+    const spread = mobile ? halfW * .16 : narrow ? halfW * .25 : Math.min(1.6, margin * .32);
     [[main, 0], [farA, -.28], [farB, .3]].forEach(([r, dx]) => {
       r.group.position.x = riverX + dx * Math.max(margin, 2);
       buildRiver(r, visH, camEnd * r.parallax - visH, spread * (r === main ? 1 : 1.4));
     });
     dataMat.uniforms.dpr.value = renderer.getPixelRatio();
-    night.visible = !narrow;
-    night.scale.set(margin + 2.4, visH + 2, 1);
-    cargo.scale.setScalar(narrow ? .7 : 1);
+    night.visible = !narrow || mobile;
+    night.scale.set(nightW, visH + 2, 1);
+    cargo.scale.setScalar(CS);
     wakeMat.uniforms.px.value = U * renderer.getPixelRatio();
   }
 
@@ -284,10 +348,35 @@ function init() {
   function frame(dt) {
     time += dt;
     const camY = -scrollY / U;
-    camera.position.set(0, camY, 100); camera.lookAt(0, camY, 0);
-    night.position.set(halfW - (margin + 2.4) / 2 + .01, camY, .5);
-
+    camN.position.set(0, camY, 100);
+    night.position.set(halfW - nightW / 2 + .01, camY, .5);
     const vy = camY + visH * .04;
+
+    // intro camera: close on the box → framing the truck (by time), then back to the site view (by scroll)
+    const s = Math.max(0, scrollY) / Math.max(1, heroH * .9);
+    const e = sm(0, 1, s);
+    const zt = reduce ? 1 : sm(.7, 2.4, time);
+    const Zbox = mobile ? 4.4 : 5.6, Zfr = mobile ? 2.1 : 2.6;
+    const Zi = Math.exp(Math.log(Zbox) + (Math.log(Zfr) - Math.log(Zbox)) * zt);
+    const Z = e >= 1 ? 1 : Math.exp(Math.log(Zi) * (1 - e));
+    const Fx = TX, Fy = DOCK_Y + .42 + (vy + .4 * CS - DOCK_Y - .42) * zt;
+    const P0x = mobile ? 0 : narrow ? halfW * .3 : halfW * .22, P0y = mobile ? visH * .2 : 0;
+    const Px = P0x + (Fx - P0x) * e, Py = P0y + (Fy - camY - P0y) * e;
+    camera.zoom = Z; camera.position.set(Fx - Px / Z, Fy - Py / Z, 100); camera.updateProjectionMatrix();
+    const vo = mobile ? 1 : sm(.02, .48, s);
+    if (veil && Math.abs(vo - veilOp) > .004) { veilOp = vo; veil.style.opacity = vo.toFixed(3); }
+
+    // loading loop at the dock: the box rolls out of the warehouse, waits, slides into the trailer
+    {
+      const u = (time + 1.2) % 3.6, yIn = DOCK_Y + 1.4, yHold = DOCK_Y + .42, yTr = vy + 1.6 * CS - .55;
+      let by = yHold, show = true;
+      if (u < .9) by = yIn + (yHold - yIn) * sm(0, .9, u);
+      else if (u >= 2.1 && u < 3.1) { by = yHold + (yTr - yHold) * sm(2.1, 3.1, u); show = s < .04; }
+      else if (u >= 3.1) show = false;
+      if (reduce) { by = yHold; show = true; }
+      loadBox.position.set(TX, by, .295); loadBox.scale.setScalar(CS); loadBox.visible = show && camY > -visH * 2;
+      apron.visible = roof.visible = roofShade.visible = camY > -visH * 2;
+    }
     const a = sm(J1 - 1.8, J1 + 1.8, vy), b = sm(J2 - 1.8, J2 + 1.8, vy);
     const sTruck = a, sPlane = (1 - a) * b, sShip = 1 - b;
     truck.visible = sTruck > .5; plane.visible = sPlane > .5; ship.visible = sShip > .5;     // the swap happens inside the clouds
@@ -305,11 +394,12 @@ function init() {
     traffic.forEach((t) => {
       if (t.y === undefined || t.y > camY + visH * .8 || t.y < camY - visH * 1.6) t.y = camY - visH * (.75 + t.k * .9);
       t.y += dt * (DRIVE + .9);                                                     // oncoming: steady speed up the right lane
-      t.o.position.set(laneX + LANE, t.y, .3); t.o.visible = t.y > J1 + 2.5;
+      t.o.position.set(laneX + LANE, t.y, .3); t.o.visible = t.y > J1 + 2.5 && t.y < DOCK_Y - 1.8; t.o.scale.setScalar(CS);
     });
     if (convoy.userData.y === undefined || convoy.userData.y > camY + visH * .8 || convoy.userData.y < camY - visH * 1.6) convoy.userData.y = camY - visH * .45;
     convoy.userData.y += dt * (DRIVE - 2.1);                                       // a slower truck ahead in our lane
-    convoy.position.set(laneX - LANE, convoy.userData.y, .3); convoy.visible = convoy.userData.y > J1 + 2.5 && convoy.userData.y < vy - 3.8;
+    convoy.userData.y = Math.min(convoy.userData.y, vy - 4.6 * CS);                // …that pulls away instead of being hit
+    convoy.position.set(laneX - LANE, convoy.userData.y, .3); convoy.scale.setScalar(CS); convoy.visible = convoy.userData.y > J1 + 2.5 && e > .6;
 
     // flight: the map starts at the truck road's scale and zooms out (the plane climbs)
     land.visible = miniRoad.visible = camY < J1 + visH && camY > J2 - visH;
@@ -429,6 +519,7 @@ function init() {
       if (truck.visible) targets.push([cx, cy + .9 * cs], [cx, cy + .1 * cs]);
       else if (plane.visible) targets.push([cx, cy + .5 * cs], [cx, cy - .4 * cs]);
       else targets.push([cx, cy + 1.2 * cs], [cx, cy - 1.0 * cs]);
+      targets.forEach((q) => { q[0] = (q[0] - camera.position.x) * Z; q[1] = camY + (q[1] - camera.position.y) * Z; });
       const lp = linkGeo.attributes.position.array; let k = 0;
       const curves = targets.map(([tx, ty], li) => {
         const n = main.nodes[nearestIn(main.nodes, ty + (li - .5) * 1.2)] || new THREE.Vector3();
@@ -448,7 +539,7 @@ function init() {
       });
       dataGeo.attributes.position.needsUpdate = true; dataGeo.attributes.size.needsUpdate = true; dataGeo.attributes.alpha.needsUpdate = true;
     }
-    renderer.render(scene, camera);
+    renderer.clear(); renderer.render(scene, camera); renderer.clearDepth(); renderer.render(scene, camN);
   }
 
   layout();

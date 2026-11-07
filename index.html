@@ -29,7 +29,7 @@ a{color:inherit;text-decoration:none}
 
 #flow{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:0;transition:opacity 1.2s ease}
 #flow.ready{opacity:1}
-.veil{position:fixed;inset:0;z-index:0;pointer-events:none;
+.veil{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0;
   background:linear-gradient(90deg,rgba(238,243,248,0) calc(50% - 560px),rgba(238,243,248,.9) calc(50% - 470px),rgba(238,243,248,.93) 50%,rgba(238,243,248,.9) calc(50% + 470px),rgba(238,243,248,0) calc(50% + 560px))}
 @media (max-width:1180px){.veil{background:linear-gradient(90deg,rgba(238,243,248,.35),rgba(238,243,248,.9) 18%,rgba(238,243,248,.93) 50%,rgba(238,243,248,.9) 82%,rgba(238,243,248,.35))}}
 main,footer{position:relative;z-index:1}
@@ -48,7 +48,20 @@ nav.main a:hover{color:var(--ink);background:rgba(11,37,69,.06)}
 .btn-blue:hover{background:var(--blue-2)}
 .btn-lg{padding:13px 26px;font-size:15px}
 
-.hero{position:relative;text-align:center;padding:120px 0 40px;min-height:clamp(680px,92vh,900px)}
+.hero{position:relative;padding:0;min-height:calc(100vh - 64px);display:flex;align-items:center}
+.hero::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;-webkit-mask-image:linear-gradient(#000 75%,transparent);mask-image:linear-gradient(#000 75%,transparent);
+  background:linear-gradient(90deg,rgba(238,243,248,.98) 0,rgba(238,243,248,.94) calc(50% - 40px),rgba(238,243,248,0) calc(50% + 160px))}
+.hero .wrap{width:100%}
+.hero-copy{max-width:540px;padding:40px 0}
+.hero .eyebrow{justify-content:flex-start}
+.hero .eyebrow::before{display:none}
+.hero .wordmark{font-size:clamp(46px,7.4vw,96px)}
+.hero .lead{margin:24px 0 0;font-size:18px}
+.hero .cta-row{justify-content:flex-start}
+.cue{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:6px;font:400 12px var(--mono);letter-spacing:.06em;color:var(--soft)}
+.cue i{width:1px;height:34px;background:linear-gradient(var(--blue),transparent);animation:cue 1.8s ease-in-out infinite}
+@keyframes cue{0%{transform:scaleY(.2);transform-origin:top}60%{transform:scaleY(1);transform-origin:top}100%{transform:scaleY(1);opacity:0}}
+.win{display:none}
 .eyebrow{display:flex;align-items:center;justify-content:center;gap:14px;font:400 14px var(--mono);letter-spacing:.04em;color:var(--muted);margin:0 0 22px}
 .eyebrow::before,.eyebrow::after{content:"";height:1px;width:48px;background:linear-gradient(90deg,transparent,var(--line-2))}
 .eyebrow::after{transform:scaleX(-1)}
@@ -161,8 +174,25 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px;
 }
 @media (max-width:640px){
   .wrap{padding:0 16px}
-  .veil{background:rgba(238,243,248,.86)}
-  .hero{padding-top:72px}
+  .veil{display:none}
+  /* phones: the journey shows through windows between solid sections */
+  section.block,footer{background:rgba(238,243,248,.96)}
+  section.block{padding-top:72px;padding-bottom:56px}
+  #ai{background:none;padding-top:0}
+  #ai .head,#ai .chapter,#ai .pilot{background:rgba(238,243,248,.96);margin-left:-16px;margin-right:-16px;padding:28px 16px}
+  #ai .head{margin-bottom:0;padding-top:64px}
+  #ai .story{gap:62vh}
+  #ai .pilot{margin-top:0;background:linear-gradient(135deg,#0b2545,#0a4d8c);border-radius:0}
+  #contact{min-height:0;padding:72px 0 56px}
+  .win{display:block;height:64vh}
+  .win-end{height:88vh}
+  .hero{min-height:100svh;align-items:flex-end}
+  .hero::before{-webkit-mask-image:none;mask-image:none;background:linear-gradient(0deg,rgba(238,243,248,1) 0,rgba(238,243,248,.97) 50%,rgba(238,243,248,0) 66%)}
+  .hero-copy{padding:0 0 64px}
+  .hero .wordmark{font-size:44px}
+  .hero .lead{font-size:16px;margin-top:16px}
+  .hero .cta-row{margin-top:24px}
+  .cue{bottom:14px}
   .grid3,.pain,.value,.how{grid-template-columns:1fr}
   .cost{grid-template-columns:1fr}
   .cost div:nth-child(2n){border-left:0}
@@ -185,23 +215,26 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px;
 </div></header>
 
 <main id="top">
-<section class="hero"><div class="wrap">
+<section class="hero" id="intro"><div class="wrap"><div class="hero-copy">
   <p class="eyebrow">Поставщик с собственной ИИ-системой, Ташкент</p>
   <h1 class="wordmark">PRIME FLOW</h1>
   <p class="lead">Поставляем оборудование, запчасти и материалы для энергетики, нефтегаза и железной дороги — и строим ИИ-агентов, которые снимают рутину с закупок крупных организаций.</p>
   <div class="cta-row"><a class="btn btn-blue" href="#contact">Отправить заявку</a><a class="btn btn-ghost btn-lg" href="#ai">ИИ для закупок</a></div>
-</div></section>
+</div></div><div class="cue" aria-hidden="true">листайте<i></i></div></section>
+<div class="win" aria-hidden="true"></div>
 
 <section class="block" id="lines"><div class="wrap">
   <div class="head"><h2>Что мы поставляем</h2><p>Товары по спецификации заказчика — с документами, которые проходят приёмку.</p></div>
   <div class="grid3"><article class="card"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z"/></svg></span><h3>Электротехника и энергетика</h3><p>Кабельная продукция, коммутационная аппаратура, щитовое оборудование и комплектующие для подстанций.</p></article><article class="card"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3v18M17 3v18M7 7h10M7 12h10M7 17h10"/></svg></span><h3>Железнодорожная автоматика</h3><p>Реле, оборудование СЦБ и комплектующие для систем сигнализации, централизации и блокировки.</p></article><article class="card"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 14l4-4"/><path d="M3.5 16a9 9 0 1 1 17 0"/><circle cx="12" cy="14" r="1.2"/></svg></span><h3>КИПиА и приборы</h3><p>Датчики, манометры, расходомеры, анализаторы и измерительные инструменты.</p></article><article class="card"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg></span><h3>Оборудование и запчасти</h3><p>Насосы, компрессоры, редукторы и запасные части по каталожному номеру производителя.</p></article><article class="card"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9v6M21 9v6M3 12h6M15 12h6M9 8l6 8M15 8l-6 8M12 4v4M9 4h6"/></svg></span><h3>Трубопроводная арматура</h3><p>Задвижки, краны, клапаны, фитинги и уплотнения для нефтегаза и промышленности.</p></article><article class="card"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/></svg></span><h3>Инструменты, СИЗ и MRO</h3><p>Инструмент, средства защиты, смазочные материалы и расходники для ежедневной работы объекта.</p></article></div>
 </div></section>
 
+<div class="win" aria-hidden="true"></div>
 <section class="block" id="process"><div class="wrap">
   <div class="head"><h2>От заявки до склада</h2><p>Шесть шагов, на каждом — документ и ответственный. Вы всегда знаете, где сейчас ваш заказ.</p></div>
   <ol class="steps"><li><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v12H4z"/><path d="M4 13h5l1 2h4l1-2h5"/></svg></span><span class="n"></span><h3>Заявка</h3><p>Получаем ТЗ, объёмы и условия поставки.</p></li><li><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg></span><span class="n"></span><h3>Подбор</h3><p>Ищем производителей и сверяем спецификации.</p></li><li><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/></svg></span><span class="n"></span><h3>Предложение</h3><p>Цена, срок, Incoterms и документы.</p></li><li><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/></svg></span><span class="n"></span><h3>Договор</h3><p>Подписываем договор и размещаем заказ.</p></li><li><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 7h11v9H2zM13 10h4l4 3v3h-8"/><circle cx="6" cy="18" r="1.8"/><circle cx="17" cy="18" r="1.8"/></svg></span><span class="n"></span><h3>Логистика</h3><p>Доставка, таможня и контроль сроков.</p></li><li><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7l9-4 9 4v10l-9 4-9-4z"/><path d="M3 7l9 4 9-4M12 11v10"/></svg></span><span class="n"></span><h3>Поставка</h3><p>Передаём товар с полным пакетом документов.</p></li></ol>
 </div></section>
 
+<div class="win" aria-hidden="true"></div>
 <section class="block" id="ai"><div class="wrap">
   <div class="head"><span class="kicker">ИИ для закупок крупных организаций</span><h2>Закупки, в которых решают люди, а рутину делает ИИ</h2><p>Мы поставщик и каждый день проходим тендеры крупных компаний изнутри. Поэтому строим ИИ-агентов, которые забирают у закупочных команд то, что отнимает больше всего времени и нервов.</p></div>
   <div class="story">
@@ -213,6 +246,7 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px;
   <div class="pilot"><div><h4>Сначала — на себе</h4><p>PRIME FLOW — первый пользователь системы: агенты работают на нашем реальном потоке тендеров и поставок. Мы предлагаем клиентам только то, что проверили сами.</p><a class="btn btn-blue" href="#contact">Обсудить пилот</a></div><div class="feed" aria-hidden="true"><div class="msg"><div class="who">Письмо заказчика · 09:42</div>Просим подтвердить срок поставки партии и приложить доверенность на получателя.<div class="ai"><span>ИИ-выжимка:</span> Заказчик просит подтвердить срок поставки и прислать доверенность.</div></div><div class="msg"><div class="who">Напоминание · 10:00</div>Договор: до планового срока поставки осталось 5 дней.<div class="ai"><span>ИИ-выжимка:</span> Товар в пути, таможенное оформление запланировано.</div></div></div></div>
 </div></section>
 
+<div class="win" aria-hidden="true"></div>
 <section class="block" id="contact"><div class="wrap contact">
   <div><h2 class="h2">Расскажите, что нужно</h2><p class="intro">Пришлите спецификацию на поставку или расскажите о закупочном процессе, который хотите ускорить.</p><dl class="req"><dt>Компания</dt><dd>ООО «PRIME FLOW»</dd><dt>ИНН</dt><dd>312556227</dd><dt>Банк</dt><dd>«ASIA ALLIANCE BANK» АТ, г. Ташкент</dd><dt>МФО</dt><dd>01095</dd><dt>Директор</dt><dd>Хамиджанов Эльбек Улугбекович</dd><dt>Почта</dt><dd><a href="mailto:info@primeflow.uz">info@primeflow.uz</a></dd><dt>Телефон</dt><dd>+998 90 995 05 99, +998 77 265 51 44</dd><dt>Адрес</dt><dd>Ташкент, Мирзо-Улугбекский р-н, МФЙ Алишеробод, ул. Жасорат, 174</dd></dl></div>
   <form class="form" id="req-form">
@@ -222,7 +256,7 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px;
     <button class="btn btn-blue" type="submit">Отправить заявку</button>
   </form>
 </div></section>
-
+<div class="win win-end" aria-hidden="true"></div>
 </main>
 
 <footer><div class="wrap"><span>© 2026 ООО «PRIME FLOW». Ташкент, Узбекистан.</span><span><a href="tel:+998909950599">+998 90 995 05 99</a> &nbsp; <a href="tel:+998772655144">+998 77 265 51 44</a> &nbsp; <a href="mailto:info@primeflow.uz">info@primeflow.uz</a></span></div></footer>
