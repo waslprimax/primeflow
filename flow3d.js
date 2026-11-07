@@ -109,14 +109,36 @@ function init() {
   const apronTex = ctex(1024, 128, (g, w, h) => {
     g.fillStyle = '#c3c8cd'; g.fillRect(0, 0, w, h);
     for (let i = 0; i < 3000; i++) { g.fillStyle = `rgba(${Math.random() < .5 ? '255,255,255' : '40,50,60'},${Math.random() * .08})`; g.fillRect(Math.random() * w, Math.random() * h, 2, 2); }
-    const bx = w / 2 - 58, bw = 116;                                                          // dock leveler (steel plate)
-    g.fillStyle = '#8c949b'; g.fillRect(bx, 0, bw, h - 22);
-    g.fillStyle = 'rgba(255,255,255,.28)'; for (let y = 6; y < h - 26; y += 10) for (let x = bx + 4 + (y % 20 ? 5 : 0); x < bx + bw - 4; x += 10) g.fillRect(x, y, 5, 2);
-    for (let x = bx - 30; x < bx + bw + 30; x += 20) { g.fillStyle = (x / 20) % 2 ? '#f2c230' : '#1d1d1d'; g.beginPath(); g.moveTo(x, h); g.lineTo(x + 10, h - 22); g.lineTo(x + 30, h - 22); g.lineTo(x + 20, h); g.fill(); }
-    g.fillStyle = '#222'; g.fillRect(bx - 22, 0, 16, 34); g.fillRect(bx + bw + 6, 0, 16, 34);  // bumpers
+    [-193, 0, 193].forEach((dx) => {                                                          // three dock levelers
+      const bx = w / 2 + dx - 58, bw = 116;
+      g.fillStyle = '#8c949b'; g.fillRect(bx, 0, bw, h - 22);
+      g.fillStyle = 'rgba(255,255,255,.28)'; for (let y = 6; y < h - 26; y += 10) for (let x = bx + 4 + (y % 20 ? 5 : 0); x < bx + bw - 4; x += 10) g.fillRect(x, y, 5, 2);
+      for (let k = 0; k < 9; k++) { const x = bx - 22 + k * 20; g.fillStyle = k % 2 ? '#1d1d1d' : '#f2c230'; g.beginPath(); g.moveTo(x, h); g.lineTo(x + 10, h - 22); g.lineTo(x + 30, h - 22); g.lineTo(x + 20, h); g.fill(); }
+      g.fillStyle = '#222'; g.fillRect(bx - 22, 0, 16, 34); g.fillRect(bx + bw + 6, 0, 16, 34);
+    });
   });
   const palletTex = ctex(128, 128, (g, w, h) => { g.fillStyle = 'rgba(40,28,14,.85)'; g.fillRect(0, 0, w, h); g.fillStyle = '#b8895a'; for (let y = 4; y < h; y += 25) g.fillRect(2, y, w - 4, 17); });
   const apron = at(flat(apronTex, { transparent: false, depthWrite: true }), .2);
+  // the warehouse yard: the truck stands here while loading, then drives out through the gate onto the road
+  const YARD_W = 9, YARD_H = 6.4, BAY = 1.7;
+  const yardTex = ctex(1024, Math.round(1024 * YARD_H / YARD_W), (g, w, h) => {
+    const px = w / YARD_W, r = mulberry32(21);
+    g.fillStyle = '#b8bec4'; g.fillRect(0, 0, w, h);
+    for (let i = 0; i < 9000; i++) { g.fillStyle = `rgba(${r() < .5 ? '255,255,255' : '40,50,60'},${r() * .07})`; g.fillRect(r() * w, r() * h, 2, 2); }
+    g.strokeStyle = 'rgba(80,88,96,.25)'; g.lineWidth = 2; for (let y = 0; y < h; y += px * 1.6) { g.beginPath(); g.moveTo(0, y); g.lineTo(w, y); g.stroke(); }
+    for (let i = 0; i < 6; i++) { g.fillStyle = 'rgba(30,30,30,.06)'; g.beginPath(); g.ellipse(r() * w, r() * h, 30 + r() * 60, 10 + r() * 20, r() * 3, 0, 7); g.fill(); }   // tyre/oil stains
+    g.strokeStyle = '#f2c230'; g.lineWidth = 5;                                              // bay lines
+    [-1.5, -.5, .5, 1.5].forEach((k) => { const x = w / 2 + k * BAY * px; g.beginPath(); g.moveTo(x, 0); g.lineTo(x, 3.9 * px); g.stroke(); });
+    const gx = w / 2 + LANE * px, gw = 2.8 * px;                                              // gate opening centred on the road
+    g.fillStyle = '#4b535b'; g.fillRect(0, h - 10, gx - gw / 2, 10); g.fillRect(gx + gw / 2, h - 10, w, 10); g.fillRect(0, 0, 10, h); g.fillRect(w - 10, 0, 10, h);
+    g.fillStyle = '#e9edf1'; for (let x = 0; x < w; x += 46) if (x < gx - gw / 2 - 8 || x > gx + gw / 2 + 8) g.fillRect(x, h - 14, 10, 18);
+    g.fillStyle = '#d23c2c'; g.fillRect(gx + gw / 2 + 4, h - 26, gw * .9, 9);                 // open sliding gate
+    g.fillStyle = '#ffffff'; for (let x = gx + gw / 2 + 10; x < gx + gw / 2 + gw * .9; x += 34) g.fillRect(x, h - 26, 14, 9);
+    g.fillStyle = '#e8ecef'; g.fillRect(gx - gw / 2 - 1.3 * px, h - 1.1 * px, 1.0 * px, .8 * px); g.fillStyle = 'rgba(0,0,0,.25)'; g.fillRect(gx - gw / 2 - .3 * px, h - 1.1 * px, 8, .8 * px);  // guard booth
+    g.fillStyle = '#f2c230'; g.font = `600 ${Math.round(px * .34)}px Inter, sans-serif`; g.textAlign = 'center'; g.fillText('↓', gx, h - .5 * px);
+  });
+  const depot = at(flat(yardTex, { transparent: false, depthWrite: true }), .15);
+  const parked = [0, 1].map((i) => { const t = photo(...TRUCK); t.userData.body.material.color.set(['#e6edf4', '#ffe8dc'][i]); at(t, .3); return t; });
   const roofShade = at(flat(ctex(4, 64, (g, w, h) => { const l = g.createLinearGradient(0, 0, 0, h); l.addColorStop(0, 'rgba(10,20,36,.45)'); l.addColorStop(1, 'rgba(10,20,36,0)'); g.fillStyle = l; g.fillRect(0, 0, w, h); })), .21);
   const roof = at(flat(roofTex), .36);
   const BOX = .62;
@@ -278,7 +300,7 @@ function init() {
 
   // ===== layout =============================================================================
   let visH = 15, halfW = 12, laneX = -9, riverX = 9, margin = 4, J1 = -30, J2 = -60, camEnd = -100, narrow = false, mobile = false;
-  let TX = -9, DOCK_Y = 2, CS = 1, nightW = 6, heroH = 800;
+  let TX = -9, DOCK_Y = 2, GATE_Y = -4, drivePh = 0, CS = 1, nightW = 6, heroH = 800;
   const veil = document.querySelector('.veil'); let veilOp = -1;
   const worldY = (docY) => -(docY - innerHeight * .5) / U;
   function layout() {
@@ -297,6 +319,9 @@ function init() {
     TX = laneX - LANE; DOCK_Y = visH * .04 + 1.6 * CS + .02;
     heroH = (document.getElementById('intro') || {}).offsetHeight || h;
     apron.scale.set(9, .9, 1); apron.position.set(TX, DOCK_Y + .45, .2);
+    GATE_Y = DOCK_Y - YARD_H;
+    depot.scale.set(YARD_W, YARD_H, 1); depot.position.set(TX, DOCK_Y - YARD_H / 2, .15);
+    parked.forEach((t, i) => { t.scale.setScalar(CS); t.position.set(TX + (i ? BAY : -BAY), DOCK_Y - 1.6 * CS - .03, .3); });
     roofShade.scale.set(9, .45, 1); roofShade.position.set(TX, DOCK_Y + .9 - .225, .21);
     roof.scale.set(9, 9, 1); roof.position.set(TX, DOCK_Y + .9 + 4.5, .36);
     junction.forEach((arr) => arr.forEach((c, i) => { c.s.visible = !mobile || i % 2 === 0; }));
@@ -307,8 +332,9 @@ function init() {
     camEnd = -(docH - h) / U;
     const top = visH + 14, gW = halfW * 2 + 30;
     const gBot = J1;
-    road.scale.set(TILE_W * .5, top - gBot, 1); road.position.set(laneX, (top + gBot) / 2, .01);
-    roadTex.repeat.set(.5, (top - gBot) / TILE_H); roadTex.offset.x = .25;
+    const rTop = GATE_Y;                                                      // the road starts at the yard gate
+    road.scale.set(TILE_W * .5, rTop - gBot, 1); road.position.set(laneX, (rTop + gBot) / 2, .01);
+    roadTex.repeat.set(.5, (rTop - gBot) / TILE_H); roadTex.offset.x = .25;
     steppe.scale.set(gW, top - gBot, 1); steppe.position.set(0, (top + gBot) / 2, 0);
     steppeTex.repeat.set(gW / (TILE_W * .76), (top - gBot) / TILE_H);
     land.scale.set(gW, J1 - J2, 1); land.position.set(0, (J1 + J2) / 2, -.2);
@@ -363,7 +389,7 @@ function init() {
     const P0x = mobile ? 0 : narrow ? halfW * .3 : halfW * .22, P0y = mobile ? visH * .2 : 0;
     const Px = P0x + (Fx - P0x) * e, Py = P0y + (Fy - camY - P0y) * e;
     camera.zoom = Z; camera.position.set(Fx - Px / Z, Fy - Py / Z, 100); camera.updateProjectionMatrix();
-    const vo = mobile ? 1 : sm(.02, .48, s);
+    const vo = mobile ? 1 : sm(.18, .62, s);
     if (veil && Math.abs(vo - veilOp) > .004) { veilOp = vo; veil.style.opacity = vo.toFixed(3); }
 
     // loading loop at the dock: the box rolls out of the warehouse, waits, slides into the trailer
@@ -375,7 +401,7 @@ function init() {
       else if (u >= 3.1) show = false;
       if (reduce) { by = yHold; show = true; }
       loadBox.position.set(TX, by, .295); loadBox.scale.setScalar(CS); loadBox.visible = show && camY > -visH * 2;
-      apron.visible = roof.visible = roofShade.visible = camY > -visH * 2;
+      apron.visible = roof.visible = roofShade.visible = depot.visible = camY > -visH * 2.5; parked.forEach((t) => { t.visible = depot.visible; });
     }
     const a = sm(J1 - 1.8, J1 + 1.8, vy), b = sm(J2 - 1.8, J2 + 1.8, vy);
     const sTruck = a, sPlane = (1 - a) * b, sShip = 1 - b;
@@ -390,16 +416,17 @@ function init() {
     cargo.position.set(laneX - (truck.visible ? LANE : 0), sy, .3);
 
     // highway
-    roadTex.offset.y = -(time * DRIVE) / TILE_H; steppeTex.offset.y = roadTex.offset.y;
+    drivePh += dt * DRIVE * (reduce ? 1 : sm(0, .3, s));                     // standing at the dock until the page moves
+    roadTex.offset.y = -drivePh / TILE_H; steppeTex.offset.y = roadTex.offset.y;
     traffic.forEach((t) => {
       if (t.y === undefined || t.y > camY + visH * .8 || t.y < camY - visH * 1.6) t.y = camY - visH * (.75 + t.k * .9);
       t.y += dt * (DRIVE + .9);                                                     // oncoming: steady speed up the right lane
-      t.o.position.set(laneX + LANE, t.y, .3); t.o.visible = t.y > J1 + 2.5 && t.y < DOCK_Y - 1.8; t.o.scale.setScalar(CS);
+      t.o.position.set(laneX + LANE, t.y, .3); t.o.visible = t.y > J1 + 2.5 && t.y < GATE_Y - 1.8; t.o.scale.setScalar(CS);
     });
     if (convoy.userData.y === undefined || convoy.userData.y > camY + visH * .8 || convoy.userData.y < camY - visH * 1.6) convoy.userData.y = camY - visH * .45;
     convoy.userData.y += dt * (DRIVE - 2.1);                                       // a slower truck ahead in our lane
     convoy.userData.y = Math.min(convoy.userData.y, vy - 4.6 * CS);                // …that pulls away instead of being hit
-    convoy.position.set(laneX - LANE, convoy.userData.y, .3); convoy.scale.setScalar(CS); convoy.visible = convoy.userData.y > J1 + 2.5 && e > .6;
+    convoy.position.set(laneX - LANE, convoy.userData.y, .3); convoy.scale.setScalar(CS); convoy.visible = convoy.userData.y > J1 + 2.5 && convoy.userData.y < GATE_Y - 1.8 && e > .6;
 
     // flight: the map starts at the truck road's scale and zooms out (the plane climbs)
     land.visible = miniRoad.visible = camY < J1 + visH && camY > J2 - visH;
