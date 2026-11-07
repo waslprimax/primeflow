@@ -242,16 +242,19 @@ function init() {
   const nightTex = ctex(256, 4, (g, w) => { const l = g.createLinearGradient(0, 0, w, 0); l.addColorStop(0, 'rgba(5,6,15,0)'); l.addColorStop(.35, 'rgba(5,6,15,.92)'); l.addColorStop(1, 'rgba(5,6,15,1)'); g.fillStyle = l; g.fillRect(0, 0, w, 4); });
   const night = NL(at(flat(nightTex), .5));
   // a river = layered neural stream. parallax < 1 → further away (slower, softer, larger dots)
-  const flashGeoOf = (n) => { const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(n * 3), 3)); g.setAttribute('size', new THREE.BufferAttribute(new Float32Array(n), 1)); g.setAttribute('alpha', new THREE.BufferAttribute(new Float32Array(n), 1)); return g; };
+  const flashGeoOf = (n) => { const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(n * 3), 3)); g.setAttribute('size', new THREE.BufferAttribute(new Float32Array(n), 1)); g.setAttribute('alpha', new THREE.BufferAttribute(new Float32Array(n), 1)); g.setAttribute('tint', new THREE.BufferAttribute(new Float32Array(n * 3).fill(1), 3)); return g; };
   const glowMat = (color) => new THREE.ShaderMaterial({
     uniforms: { map: { value: dot }, color: { value: new THREE.Color(color) }, dpr: { value: 1 } }, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
-    vertexShader: 'attribute float size; attribute float alpha; varying float vA; uniform float dpr; void main(){ vA = alpha; gl_PointSize = size * dpr; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.); }',
-    fragmentShader: 'uniform sampler2D map; uniform vec3 color; varying float vA; void main(){ vec4 c = texture2D(map, gl_PointCoord); gl_FragColor = vec4(color * c.a * vA, c.a * vA); }',
+    vertexShader: 'attribute float size; attribute float alpha; attribute vec3 tint; varying float vA; varying vec3 vT; uniform float dpr; void main(){ vA = alpha; vT = tint; gl_PointSize = size * dpr; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.); }',
+    fragmentShader: 'uniform sampler2D map; uniform vec3 color; varying float vA; varying vec3 vT; void main(){ vec4 c = texture2D(map, gl_PointCoord); gl_FragColor = vec4(color * vT * c.a * vA, c.a * vA); }',
   });
+  // calm mixed palette: blue, violet, warm yellow, teal, rose — muted so the band stays quiet
+  const NEURO = ['#3f8fd8', '#5cb8e6', '#8a7ce8', '#a98fe0', '#d9bf72', '#c9a95e', '#5fbfa4', '#cf8fae'].map((c) => new THREE.Color(c).multiplyScalar(.95));
+  const neuroColor = () => NEURO[Math.floor(rand() * NEURO.length)].clone().lerp(new THREE.Color('#9fb3c8'), .1 + rand() * .12);
   const rivers = [];
   function makeRiver(o) {
     const group = new THREE.Group(); group.position.z = o.z; scene.add(group);
-    const r = { ...o, group, nodes: [], edges: [], out: [], pulses: [], pulseGeo: null, flashes: [], flashGeo: null, flashMat: glowMat(o.flashColor || '#bfeaff') };
+    const r = { ...o, group, nodes: [], edges: [], out: [], pulses: [], pulseGeo: null, flashes: [], flashGeo: null, flashMat: glowMat('#ffffff'), nc: [] };
     rivers.push(r); return r;
   }
   function buildRiver(r, top, bottom, spread) {
@@ -265,16 +268,17 @@ function init() {
       cand.sort((x, y) => p.distanceTo(nodes[x]) - p.distanceTo(nodes[y])).slice(0, 2 + (rand() < .35)).forEach((j) => { out[i].push(edges.length); edges.push([i, j]); });
     });
     const ng = new THREE.BufferGeometry().setFromPoints(nodes);
-    const col = new Float32Array(nodes.length * 3); nodes.forEach((_, i) => BLUE.clone().lerp(CYAN, rand()).toArray(col, i * 3));
+    const col = new Float32Array(nodes.length * 3); const nc = nodes.map(() => neuroColor()); nc.forEach((c, i) => c.toArray(col, i * 3)); r.nc = nc;
     ng.setAttribute('color', new THREE.BufferAttribute(col, 3));
     const lp = new Float32Array(edges.length * 6); edges.forEach(([x, y], i) => { nodes[x].toArray(lp, i * 6); nodes[y].toArray(lp, i * 6 + 3); });
     const lg = new THREE.BufferGeometry(); lg.setAttribute('position', new THREE.BufferAttribute(lp, 3));
+    const lc = new Float32Array(edges.length * 6); edges.forEach(([x, y], i) => { nc[x].toArray(lc, i * 6); nc[y].toArray(lc, i * 6 + 3); }); lg.setAttribute('color', new THREE.BufferAttribute(lc, 3));
     r.pulseGeo = new THREE.BufferGeometry(); r.pulseGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(r.pulsesN * 3), 3));
     r.flashGeo = flashGeoOf(r.flashN);
     r.group.add(
-      new THREE.LineSegments(lg, new THREE.LineBasicMaterial({ color: CYAN, transparent: true, opacity: r.lineOp, depthWrite: false, blending: THREE.AdditiveBlending })),
+      new THREE.LineSegments(lg, new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: r.lineOp * .85, depthWrite: false, blending: THREE.AdditiveBlending })),
       new THREE.Points(ng, new THREE.PointsMaterial({ size: r.dotPx, sizeAttenuation: false, map: dot, vertexColors: true, transparent: true, opacity: r.dotOp, depthWrite: false, blending: THREE.AdditiveBlending })),
-      new THREE.Points(r.pulseGeo, new THREE.PointsMaterial({ size: r.dotPx * .9, sizeAttenuation: false, map: dot, color: ICE, transparent: true, opacity: r.dotOp, depthWrite: false, blending: THREE.AdditiveBlending })),
+      new THREE.Points(r.pulseGeo, new THREE.PointsMaterial({ size: r.dotPx * .9, sizeAttenuation: false, map: dot, color: '#dfe6f0', transparent: true, opacity: r.dotOp * .75, depthWrite: false, blending: THREE.AdditiveBlending })),
       new THREE.Points(r.flashGeo, r.flashMat));
     r.group.children.forEach((c) => { c.frustumCulled = false; c.layers.set(1); });
     r.flashMat.uniforms.dpr.value = renderer.getPixelRatio();
@@ -520,7 +524,7 @@ function init() {
         p.t += dt * p.v * r.speed;
         if (p.t >= 1) {
           const end = edges[p.e][1];
-          if (rand() < r.flashChance) { const f = r.flashes.find((q) => q.life <= 0); if (f) { f.life = .55; f.x = nodes[end].x; f.y = nodes[end].y; f.s = .8 + rand() * .6; } }
+          if (rand() < r.flashChance) { const f = r.flashes.find((q) => q.life <= 0); if (f) { f.life = .55; f.x = nodes[end].x; f.y = nodes[end].y; f.s = .8 + rand() * .6; f.c = r.nc[end]; } }
           p.e = out[end].length ? out[end][Math.floor(rand() * out[end].length)] : p.e; p.t = 0;
         }
         let [a1, b1] = edges[p.e];
@@ -528,15 +532,15 @@ function init() {
         tmp.lerpVectors(nodes[a1], nodes[b1], p.t).toArray(arr, i * 3);
       });
       r.pulseGeo.attributes.position.needsUpdate = true;
-      const fp = r.flashGeo.attributes.position.array, fs = r.flashGeo.attributes.size.array, fa = r.flashGeo.attributes.alpha.array;
+      const fp = r.flashGeo.attributes.position.array, fs = r.flashGeo.attributes.size.array, fa = r.flashGeo.attributes.alpha.array, ft = r.flashGeo.attributes.tint.array;
       r.flashes.forEach((f, i) => {
         if (f.life > 0) f.life -= dt;
         const k = Math.max(0, f.life / .55);                       // 1 → 0
         fp[i * 3] = f.x; fp[i * 3 + 1] = f.y; fp[i * 3 + 2] = .01;
         fs[i] = r.dotPx * (1.6 + 4.2 * (1 - k)) * f.s;             // quick ring-like bloom
-        fa[i] = f.life > 0 ? Math.pow(k, 1.6) * (r === main ? .85 : .45) : 0;
+        fa[i] = f.life > 0 ? Math.pow(k, 1.6) * (r === main ? .6 : .32) : 0; if (f.c) { ft[i * 3] = f.c.r * 1.25; ft[i * 3 + 1] = f.c.g * 1.25; ft[i * 3 + 2] = f.c.b * 1.25; }
       });
-      r.flashGeo.attributes.position.needsUpdate = true; r.flashGeo.attributes.size.needsUpdate = true; r.flashGeo.attributes.alpha.needsUpdate = true;
+      r.flashGeo.attributes.position.needsUpdate = true; r.flashGeo.attributes.size.needsUpdate = true; r.flashGeo.attributes.alpha.needsUpdate = true; r.flashGeo.attributes.tint.needsUpdate = true;
     });
 
     // data links from the main river to the cargo
